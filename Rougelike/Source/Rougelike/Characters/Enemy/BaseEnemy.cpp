@@ -20,6 +20,8 @@ ABaseEnemy::ABaseEnemy()
 	HealthBarComponent->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
 	HealthBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarComponent->SetDrawSize(FVector2D(100.f, 10.f));
+
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 }
 
 void ABaseEnemy::BeginPlay()

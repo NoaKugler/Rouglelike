@@ -21,7 +21,12 @@ public class Rougelike : ModuleRules
 			"Slate"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameplayTasks"
+		});
 
 		PublicIncludePaths.AddRange(new string[] {
 			"Rougelike"

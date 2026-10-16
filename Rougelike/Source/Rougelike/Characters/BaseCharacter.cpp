@@ -14,6 +14,11 @@ ABaseCharacter::ABaseCharacter()
 
     // Same subobject name as before the move, so Blueprint overrides on it (Max Health) carry over
     HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+    // Ability System Component
+    AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+    AbilitySystemComponent->SetIsReplicated(true);
+    AbilitySystemComponent->SetReplicationMode(AbilityReplicationMode);
 }
 
 void ABaseCharacter::BeginPlay()
@@ -21,6 +26,31 @@ void ABaseCharacter::BeginPlay()
     Super::BeginPlay();
 
     HealthComponent->OnDeath.AddDynamic(this, &ABaseCharacter::HandleDeath);
+}
+
+void ABaseCharacter::PossessedBy(AController *NewController)
+{
+    Super::PossessedBy(NewController);
+
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->InitAbilityActorInfo(this, this);
+    }
+}
+
+void ABaseCharacter::OnRep_PlayerState()
+{
+    Super::OnRep_PlayerState();
+
+    if (AbilitySystemComponent)
+    {
+        AbilitySystemComponent->InitAbilityActorInfo(this, this);
+    }
+}
+
+UAbilitySystemComponent *ABaseCharacter::GetAbilitySystemComponent() const
+{
+    return AbilitySystemComponent;
 }
 
 void ABaseCharacter::HandleDeath()

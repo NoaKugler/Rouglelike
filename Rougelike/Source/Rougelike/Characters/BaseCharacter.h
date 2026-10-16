@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
+#include "AbilitySystemComponent.h"
 #include "BaseCharacter.generated.h"
 
 class UHealthComponent;
@@ -11,7 +13,7 @@ class UHealthComponent;
  *  Holds only what every combatant has. Player-only and enemy-only parts stay in the subclasses.
  */
 UCLASS(Abstract)
-class ROUGELIKE_API ABaseCharacter : public ACharacter
+class ROUGELIKE_API ABaseCharacter : public ACharacter, public IAbilitySystemInterface
 {
     GENERATED_BODY()
 
@@ -20,14 +22,29 @@ public:
 
     FORCEINLINE UHealthComponent *GetHealthComponent() const { return HealthComponent; }
 
-protected:
-    virtual void BeginPlay() override;
+    // Ability System Component
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
+    class UAbilitySystemComponent *AbilitySystemComponent;
 
-    /** Bound to HealthComponent->OnDeath. Subclasses extend it and call Super. */
-    UFUNCTION()
-    virtual void HandleDeath();
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
+    EGameplayEffectReplicationMode AbilityReplicationMode = EGameplayEffectReplicationMode::Mixed;
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UHealthComponent> HealthComponent;
+
+public:
+    virtual UAbilitySystemComponent *GetAbilitySystemComponent() const override;
+
+protected:
+    virtual void BeginPlay() override;
+
+    virtual void PossessedBy(AController *NewController) override;
+
+    virtual void OnRep_PlayerState() override;
+
+    /** Bound to HealthComponent->OnDeath. Subclasses extend it and call Super. */
+    UFUNCTION()
+    virtual void HandleDeath();
 };
