@@ -117,22 +117,11 @@ void ARougelikeCharacter::Move(const FInputActionValue &Value)
 
 void ARougelikeCharacter::DoMove(float Right, float Forward)
 {
-	if (GetController() != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = GetController()->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FRotator YawRotation(0.f, FollowCamera->GetComponentRotation().Yaw, 0.f);
+	const FRotationMatrix YawMatrix(YawRotation);
 
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-		// get right vector
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement
-		AddMovementInput(ForwardDirection, Forward);
-		AddMovementInput(RightDirection, Right);
-	}
+	AddMovementInput(YawMatrix.GetUnitAxis(EAxis::X), Forward);
+	AddMovementInput(YawMatrix.GetUnitAxis(EAxis::Y), Right);
 }
 
 void ARougelikeCharacter::PostInitializeComponents()
