@@ -2,6 +2,7 @@
 
 #include "Gun/Projectile.h"
 #include "Components/SphereComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GameFramework/DamageType.h"
 #include "Kismet/GameplayStatics.h"
@@ -14,6 +15,11 @@ AProjectile::AProjectile()
 	Collision->InitSphereRadius(10.f);
 	Collision->SetCollisionProfileName(TEXT("BlockAllDynamic"));
 	RootComponent = Collision;
+
+	// Visual only, the sphere handles collision
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(Collision);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
 	Movement->InitialSpeed = 3000.f;
@@ -29,10 +35,15 @@ void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Don't collide with whoever fired us
+	// Don't collide with the gun that fired us or the pawn holding it. The muzzle
+	// sits inside the pawn's capsule, so without this the bullet dies on spawn.
 	if (AActor* OwnerActor = GetOwner())
 	{
 		Collision->IgnoreActorWhenMoving(OwnerActor, true);
+	}
+	if (AActor* InstigatorActor = GetInstigator())
+	{
+		Collision->IgnoreActorWhenMoving(InstigatorActor, true);
 	}
 
 	Collision->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);

@@ -3,7 +3,7 @@
 #include "Gun/Gun.h"
 #include "Gun/Projectile.h"
 #include "Components/SceneComponent.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Controller.h"
 
@@ -14,7 +14,7 @@ AGun::AGun()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 
-	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(Root);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 

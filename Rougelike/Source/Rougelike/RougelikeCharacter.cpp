@@ -70,6 +70,7 @@ void ARougelikeCharacter::BeginPlay()
 
 void ARougelikeCharacter::Fire()
 {
+	UE_LOG(LogRougelike, Warning, TEXT("Fire pressed, gun: %s"), *GetNameSafe(EquippedGun)); // TEMP debug
 	if (EquippedGun)
 	{
 		EquippedGun->Shoot();

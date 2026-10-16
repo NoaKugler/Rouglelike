@@ -8,7 +8,7 @@
 
 class AProjectile;
 class USceneComponent;
-class USkeletalMeshComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class ROUGELIKE_API AGun : public AActor
@@ -43,14 +43,14 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Gun")
 	int32 CurrentAmmo = 0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun")
 	TObjectPtr<USceneComponent> Root;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<USkeletalMeshComponent> Mesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun")
+	TObjectPtr<UStaticMeshComponent> Mesh;
 
 	/** Projectiles spawn here. Move it in the Blueprint to line up with the barrel. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun")
 	TObjectPtr<USceneComponent> Muzzle;
 
 private:

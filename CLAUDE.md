@@ -68,3 +68,4 @@ The user wants to **learn by building**. Claude guides, plans, explains and revi
 ## Working Notes
 - Open design questions and decisions get recorded here as we make them (add a "Decisions" section when the first one is made).
 - Keep this file short and current. Update it when goals or architecture decisions change.
+- Use the Unreal MCP to get more acces into the engine / editor
