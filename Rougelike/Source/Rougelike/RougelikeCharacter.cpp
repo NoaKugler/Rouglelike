@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Rougelike.h"
+#include "Gun/Gun.h"
 
 ARougelikeCharacter::ARougelikeCharacter()
 {
@@ -50,6 +51,31 @@ ARougelikeCharacter::ARougelikeCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+void ARougelikeCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (DefaultGunClass)
+	{
+		FActorSpawnParameters Params;
+		Params.Owner = this;
+		Params.Instigator = this;
+		EquippedGun = GetWorld()->SpawnActor<AGun>(DefaultGunClass, Params);
+		if (EquippedGun)
+		{
+			EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GunSocketName);
+		}
+	}
+}
+
+void ARougelikeCharacter::Fire()
+{
+	if (EquippedGun)
+	{
+		EquippedGun->Shoot();
+	}
+}
+
 void ARougelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
@@ -65,6 +91,9 @@ void ARougelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARougelikeCharacter::Look);
+
+		// Shooting
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ARougelikeCharacter::Fire);
 	}
 	else
 	{

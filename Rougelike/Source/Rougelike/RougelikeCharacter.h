@@ -10,6 +10,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class AGun;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -49,6 +50,21 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
 
+	/** Fire Input Action */
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* FireAction;
+
+	/** Gun spawned and equipped on BeginPlay */
+	UPROPERTY(EditDefaultsOnly, Category="Gun")
+	TSubclassOf<AGun> DefaultGunClass;
+
+	/** Socket on the character mesh the gun attaches to */
+	UPROPERTY(EditDefaultsOnly, Category="Gun")
+	FName GunSocketName = TEXT("hand_r");
+
+	UPROPERTY()
+	TObjectPtr<AGun> EquippedGun;
+
 public:
 
 	/** Constructor */
@@ -56,8 +72,13 @@ public:
 
 protected:
 
+	virtual void BeginPlay() override;
+
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	/** Called when the fire input is pressed */
+	void Fire();
 
 protected:
 
