@@ -50,8 +50,22 @@ void ARougelikePlayerController::PlayerTick(float DeltaTime)
 {
 	// Before Super: Super processes input, so a Fire() this frame already sees this frame's cursor
 	UpdateAimLocation();
+	UpdateFacing();
 
 	Super::PlayerTick(DeltaTime);
+}
+
+void ARougelikePlayerController::UpdateFacing()
+{
+	const APawn *ControlledPawn = GetPawn();
+	if (!ControlledPawn)
+	{
+		return;
+	}
+
+	// Yaw only: the character movement component turns the body toward the control rotation
+	const FVector ToAim = AimLocation - ControlledPawn->GetActorLocation();
+	SetControlRotation(FRotator(0.f, ToAim.Rotation().Yaw, 0.f));
 }
 
 void ARougelikePlayerController::UpdateAimLocation()

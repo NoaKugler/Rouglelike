@@ -26,6 +26,8 @@ public:
 	/** The cursor projected onto a horizontal plane at the pawn's center height */
 	FVector GetAimLocation() const { return AimLocation; }
 
+	void UpdateFacing();
+
 protected:
 	/** Input Mapping Contexts */
 	UPROPERTY(EditAnywhere, Category = "Input|Input Mappings")
