@@ -1,15 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Enemy/BaseEnemy.h"
 #include "Components/WidgetComponent.h"
 #include "Enemy/UI/EnemyHealthBar.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "AIController.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	// constructor
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	HealthBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
 	HealthBarComponent->SetupAttachment(RootComponent);
 	HealthBarComponent->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
@@ -23,6 +29,11 @@ void ABaseEnemy::BeginPlay()
 
 	CurrentHealth = MaxHealth;
 	UpdateHealthBar();
+
+	// AI navigation
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	TargetPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	GetWorldTimerManager().SetTimer(ChaseTimerHandle, this, &ABaseEnemy::ChaseTarget, ChaseInterval, true);
 }
 
 float ABaseEnemy::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
@@ -55,5 +66,23 @@ void ABaseEnemy::UpdateHealthBar()
 	if (UEnemyHealthBar *Bar = Cast<UEnemyHealthBar>(HealthBarComponent->GetUserWidgetObject()))
 	{
 		Bar->SetHealth(CurrentHealth, MaxHealth);
+	}
+}
+
+void ABaseEnemy::ChaseTarget()
+{
+	if (!TargetPawn.IsValid())
+	{
+		// Player may have respawned since we cached it
+		TargetPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+		if (!TargetPawn.IsValid())
+		{
+			return;
+		}
+	}
+
+	if (AAIController *AI = Cast<AAIController>(GetController()))
+	{
+		AI->MoveToActor(TargetPawn.Get(), AcceptanceRadius);
 	}
 }

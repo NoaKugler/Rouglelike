@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -34,4 +32,23 @@ protected:
 	TObjectPtr<UWidgetComponent> HealthBarComponent;
 
 	void UpdateHealthBar();
+
+	// NEW: Owned here (not just MaxWalkSpeed on the component) so speed modifiers have one value to act on later
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float MoveSpeed = 300.f;
+
+	// NEW: How close the enemy gets before the move request counts as finished
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float AcceptanceRadius = 100.f;
+
+	// NEW: How often the move is re-issued. A finished move never restarts on its own.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float ChaseInterval = 0.25f;
+
+private:
+	// NEW
+	void ChaseTarget();
+
+	TWeakObjectPtr<APawn> TargetPawn;
+	FTimerHandle ChaseTimerHandle;
 };
