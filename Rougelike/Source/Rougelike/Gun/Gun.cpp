@@ -31,7 +31,7 @@ void AGun::BeginPlay()
 
 void AGun::Shoot()
 {
-	UWorld* World = GetWorld();
+	UWorld *World = GetWorld();
 	if (!World || !ProjectileClass || CurrentAmmo <= 0)
 	{
 		return;
@@ -44,9 +44,9 @@ void AGun::Shoot()
 
 	// Aim where the owner's controller is looking, starting from the muzzle
 	FRotator AimRotation = Muzzle->GetComponentRotation();
-	if (const APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+	if (const APawn *OwnerPawn = Cast<APawn>(GetOwner()))
 	{
-		if (const AController* Controller = OwnerPawn->GetController())
+		if (const AController *Controller = OwnerPawn->GetController())
 		{
 			AimRotation = Controller->GetControlRotation();
 		}
@@ -54,13 +54,14 @@ void AGun::Shoot()
 
 	// Deferred spawn so Damage is set before the projectile's BeginPlay runs
 	FTransform SpawnTransform(AimRotation, Muzzle->GetComponentLocation());
-	AProjectile* Projectile = World->SpawnActorDeferred<AProjectile>(
+	AProjectile *Projectile = World->SpawnActorDeferred<AProjectile>(
 		ProjectileClass, SpawnTransform, this, Cast<APawn>(GetOwner()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
 	if (Projectile)
 	{
 		Projectile->Damage = Damage;
+		Projectile->Speed = ProjectileSpeed;
 		Projectile->FinishSpawning(SpawnTransform);
 	}
 

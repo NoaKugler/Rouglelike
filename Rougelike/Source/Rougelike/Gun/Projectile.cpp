@@ -13,7 +13,7 @@ AProjectile::AProjectile()
 
 	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	Collision->InitSphereRadius(10.f);
-	Collision->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	Collision->SetCollisionProfileName(TEXT("Projectile"));
 	RootComponent = Collision;
 
 	// Visual only, the sphere handles collision
@@ -22,8 +22,8 @@ AProjectile::AProjectile()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
-	Movement->InitialSpeed = 3000.f;
-	Movement->MaxSpeed = 3000.f;
+	Movement->MaxSpeed = Speed;
+	Movement->Velocity = GetActorForwardVector() * Speed;
 	Movement->ProjectileGravityScale = 0.f; // no bullet drop for now
 	Movement->bRotationFollowsVelocity = true;
 
@@ -37,11 +37,11 @@ void AProjectile::BeginPlay()
 
 	// Don't collide with the gun that fired us or the pawn holding it. The muzzle
 	// sits inside the pawn's capsule, so without this the bullet dies on spawn.
-	if (AActor* OwnerActor = GetOwner())
+	if (AActor *OwnerActor = GetOwner())
 	{
 		Collision->IgnoreActorWhenMoving(OwnerActor, true);
 	}
-	if (AActor* InstigatorActor = GetInstigator())
+	if (AActor *InstigatorActor = GetInstigator())
 	{
 		Collision->IgnoreActorWhenMoving(InstigatorActor, true);
 	}
@@ -49,7 +49,7 @@ void AProjectile::BeginPlay()
 	Collision->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 }
 
-void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AProjectile::OnHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit)
 {
 	if (OtherActor && OtherActor != this && OtherActor != GetOwner())
 	{

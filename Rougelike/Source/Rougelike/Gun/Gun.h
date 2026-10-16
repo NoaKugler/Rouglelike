@@ -33,6 +33,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = "0.01"))
 	float FireRate = 5.f;
 
+	/** Projectile travel speed. Constant for the whole flight. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = "1", Units = "cm/s"))
+	float ProjectileSpeed = 3000.f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = "1"))
 	int32 MagazineSize = 30;
 

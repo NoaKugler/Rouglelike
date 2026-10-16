@@ -21,6 +21,9 @@ public:
 	/** Set by the gun that fired us, before BeginPlay (see AGun::Shoot). */
 	float Damage = 0.f;
 
+	/** Set by the gun before BeginPlay. The default covers anything else that spawns us. */
+	float Speed = 3000.f;
+
 protected:
 	virtual void BeginPlay() override;
 
