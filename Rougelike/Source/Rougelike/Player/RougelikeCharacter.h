@@ -19,6 +19,9 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
  *  A simple player-controllable third person character
  *  Implements a controllable orbiting camera
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthChanged, float, NewHealth);
+
 UCLASS(abstract)
 class ARougelikeCharacter : public ACharacter
 {
@@ -32,7 +35,24 @@ class ARougelikeCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent *FollowCamera;
 
+public:
+	virtual float TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser) override;
+
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetCurrentHealth() const { return CurrentHealth; }
+
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnPlayerHealthChanged OnHealthChanged;
+
 protected:
+	virtual void PostInitializeComponents() override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Health")
+	float CurrentHealth = 0.f;
+
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction *JumpAction;

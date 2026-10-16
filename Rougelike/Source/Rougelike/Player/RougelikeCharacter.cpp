@@ -168,3 +168,26 @@ void ARougelikeCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
+
+void ARougelikeCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Before any BeginPlay, so the HUD reads the right starting value regardless of actor order
+	CurrentHealth = MaxHealth;
+}
+
+float ARougelikeCharacter::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
+{
+	const float Applied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (Applied <= 0.f)
+	{
+		return 0.f;
+	}
+
+	// No clamp and no death on purpose (for now)
+	CurrentHealth -= Applied;
+	OnHealthChanged.Broadcast(CurrentHealth);
+
+	return Applied;
+}

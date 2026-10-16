@@ -28,6 +28,16 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth = 0.f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	float AttackDamage = 10.f;
+
+	// Measured centre to centre, so it must exceed AcceptanceRadius + both capsule radii or the enemy stops short of hitting
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	float AttackRange = 200.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+	float AttackCooldown = 1.f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UWidgetComponent> HealthBarComponent;
 
@@ -46,8 +56,11 @@ protected:
 	float ChaseInterval = 0.25f;
 
 private:
-	// NEW
 	void ChaseTarget();
+
+	void TryAttack();
+
+	double LastAttackTime = 0.0;
 
 	TWeakObjectPtr<APawn> TargetPawn;
 	FTimerHandle ChaseTimerHandle;

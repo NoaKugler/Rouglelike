@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "AIController.h"
+#include "GameFramework/DamageType.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -34,6 +35,8 @@ void ABaseEnemy::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 	TargetPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 	GetWorldTimerManager().SetTimer(ChaseTimerHandle, this, &ABaseEnemy::ChaseTarget, ChaseInterval, true);
+
+	LastAttackTime = -AttackCooldown;
 }
 
 float ABaseEnemy::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
@@ -84,5 +87,23 @@ void ABaseEnemy::ChaseTarget()
 	if (AAIController *AI = Cast<AAIController>(GetController()))
 	{
 		AI->MoveToActor(TargetPawn.Get(), AcceptanceRadius);
+		TryAttack();
 	}
+}
+
+void ABaseEnemy::TryAttack()
+{
+	const double Now = GetWorld()->GetTimeSeconds();
+	if (Now - LastAttackTime < AttackCooldown)
+	{
+		return;
+	}
+
+	if (FVector::DistSquared(GetActorLocation(), TargetPawn->GetActorLocation()) > FMath::Square(AttackRange))
+	{
+		return;
+	}
+
+	LastAttackTime = Now;
+	UGameplayStatics::ApplyDamage(TargetPawn.Get(), AttackDamage, GetController(), this, UDamageType::StaticClass());
 }
