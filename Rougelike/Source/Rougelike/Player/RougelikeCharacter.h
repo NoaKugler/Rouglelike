@@ -12,19 +12,18 @@ class UInputAction;
 class AGun;
 struct FInputActionValue;
 
-/**
- *  A simple player-controllable third person character
- *  Implements a controllable orbiting camera
- */
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthChanged, float, NewHealth);
 
+/**
+ *  The player character: movement, jumping, the equipped gun and health.
+ *  Mesh, anim and default gun are set in BP_PlayerCharacter.
+ */
 UCLASS(abstract)
 class ARougelikeCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Camera boom positioning the camera behind the character */
+	/** Camera boom positioning the follow camera relative to the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> CameraBoom;
 

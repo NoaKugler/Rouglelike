@@ -7,7 +7,7 @@
 #include "RougelikeGameMode.generated.h"
 
 /**
- *  Simple GameMode for a third person game
+ *  Base GameMode. Default pawn and controller classes are set in BP_GameMode.
  */
 UCLASS(abstract)
 class ARougelikeGameMode : public AGameModeBase

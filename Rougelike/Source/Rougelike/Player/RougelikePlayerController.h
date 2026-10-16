@@ -10,8 +10,7 @@ class UInputMappingContext;
 class UUserWidget;
 
 /**
- *  Basic PlayerController class for a third person game
- *  Manages input mappings
+ *  Player controller: adds the input mapping contexts and spawns the HUD
  */
 UCLASS(abstract)
 class ARougelikePlayerController : public APlayerController
@@ -24,7 +23,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category ="Input|Input Mappings")
 	TArray<TObjectPtr<UInputMappingContext>> DefaultMappingContexts;
 
-	/** HUD widget (crosshair etc.) to spawn for the local player */
+	/** HUD widget to spawn for the local player */
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HUDWidgetClass;
 
