@@ -1,14 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "Core/BaseCharacter.h"
 #include "BaseEnemy.generated.h"
 
 class UWidgetComponent;
-class UHealthComponent;
 
 UCLASS()
-class ROUGELIKE_API ABaseEnemy : public ACharacter
+class ROUGELIKE_API ABaseEnemy : public ABaseCharacter
+
 {
 	GENERATED_BODY()
 
@@ -18,12 +18,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	/** Bound to HealthComponent->OnDeath */
-	UFUNCTION()
-	void HandleDeath();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UHealthComponent> HealthComponent;
+	virtual void HandleDeath() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
 	float AttackDamage = 10.f;

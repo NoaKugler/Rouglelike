@@ -3,29 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "Core/BaseCharacter.h"
 #include "RougelikeCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
-class UHealthComponent;
 class AGun;
 
 struct FInputActionValue;
 
 /**
- *  The player character: movement, jumping, the equipped gun and health.
- *  Mesh, anim and default gun are set in BP_PlayerCharacter.
+ *  The player character: camera, input, movement and the equipped gun.
+ *  Health and death come from ABaseCharacter.
  */
 UCLASS(abstract)
-class ARougelikeCharacter : public ACharacter
+class ARougelikeCharacter : public ABaseCharacter
+
 {
 	GENERATED_BODY()
-
-	/** Health and death. Damage reaches it through OnTakeAnyDamage, so this class doesn't override TakeDamage. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UHealthComponent> HealthComponent;
 
 	/** Camera boom positioning the follow camera relative to the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -35,7 +31,25 @@ class ARougelikeCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
+public:
+	ARougelikeCharacter();
+
 protected:
+	virtual void BeginPlay() override;
+
+	virtual void HandleDeath() override;
+
+	/** Initialize input action bindings */
+	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
+
+	/** Called when the fire input is pressed */
+	void Fire();
+
+	/** Called for movement input */
+	void Move(const FInputActionValue &Value);
+
+	void DoMove(float Right, float Forward);
+
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
@@ -58,29 +72,6 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<AGun> EquippedGun;
-
-public:
-	/** Constructor */
-	ARougelikeCharacter();
-
-protected:
-	virtual void BeginPlay() override;
-
-	/** Initialize input action bindings */
-	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
-
-	/** Called when the fire input is pressed */
-	void Fire();
-
-protected:
-	/** Called for movement input */
-	void Move(const FInputActionValue &Value);
-
-	void DoMove(float Right, float Forward);
-
-	/** Bound to HealthComponent->OnDeath */
-	UFUNCTION()
-	void HandleDeath();
 
 public:
 	/** Returns CameraBoom subobject **/

@@ -11,7 +11,6 @@
 #include "Weapons/Gun.h"
 #include "MyCollisionChannels.h"
 #include "Player/RougelikePlayerController.h"
-#include "Combat/HealthComponent.h"
 
 ARougelikeCharacter::ARougelikeCharacter()
 {
@@ -22,12 +21,6 @@ ARougelikeCharacter::ARougelikeCharacter()
 
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-
-	// The controller sets the control rotation toward the cursor and the movement component
-	// turns the body toward it at RotationRate. The actor itself never snaps to the controller.
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
 
 	// Orient-to-movement must be off: PhysicsRotation checks it first and it would win
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -54,15 +47,11 @@ ARougelikeCharacter::ARougelikeCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
-
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 void ARougelikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	HealthComponent->OnDeath.AddDynamic(this, &ARougelikeCharacter::HandleDeath);
 
 	if (DefaultGunClass)
 	{
@@ -75,6 +64,13 @@ void ARougelikeCharacter::BeginPlay()
 			EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GunSocketName);
 		}
 	}
+}
+
+void ARougelikeCharacter::HandleDeath()
+{
+	// Base stops movement; the player also loses control. Minimal until the run loop exists.
+	Super::HandleDeath();
+	DisableInput(nullptr);
 }
 
 void ARougelikeCharacter::Fire()
@@ -131,11 +127,4 @@ void ARougelikeCharacter::DoMove(float Right, float Forward)
 
 	AddMovementInput(YawMatrix.GetUnitAxis(EAxis::X), Forward);
 	AddMovementInput(YawMatrix.GetUnitAxis(EAxis::Y), Right);
-}
-
-void ARougelikeCharacter::HandleDeath()
-{
-	// Minimal death state until the run loop exists
-	DisableInput(nullptr);
-	GetCharacterMovement()->DisableMovement();
 }
