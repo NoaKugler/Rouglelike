@@ -1,18 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Player/RougelikeCharacter.h"
-#include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Rougelike.h"
 #include "Gun/Gun.h"
 #include "MyCollisionChannels.h"
+#include "Player/RougelikePlayerController.h"
 
 ARougelikeCharacter::ARougelikeCharacter()
 {
@@ -79,11 +77,18 @@ void ARougelikeCharacter::BeginPlay()
 
 void ARougelikeCharacter::Fire()
 {
-	UE_LOG(LogRougelike, Warning, TEXT("Fire pressed, gun: %s"), *GetNameSafe(EquippedGun)); // TEMP debug
-	if (EquippedGun)
+	if (!EquippedGun)
 	{
-		EquippedGun->Shoot();
+		return;
 	}
+
+	// The controller owns aiming. Without one (e.g. not possessed by a player), shoot straight ahead.
+	const ARougelikePlayerController *PlayerController = Cast<ARougelikePlayerController>(GetController());
+	const FVector Target = PlayerController
+							   ? PlayerController->GetAimLocation()
+							   : GetActorLocation() + GetActorForwardVector() * 1000.f;
+
+	EquippedGun->Shoot(Target);
 }
 
 void ARougelikeCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -99,8 +104,8 @@ void ARougelikeCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInput
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARougelikeCharacter::Move);
 
-		// Shooting
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ARougelikeCharacter::Fire);
+		// Triggered fires every frame while held; the gun's FireRate decides when a shot actually happens
+		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ARougelikeCharacter::Fire);
 	}
 	else
 	{
