@@ -95,10 +95,6 @@ void ARougelikeCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInput
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARougelikeCharacter::Move);
-		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ARougelikeCharacter::Look);
-
-		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARougelikeCharacter::Look);
 
 		// Shooting
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &ARougelikeCharacter::Fire);
@@ -116,15 +112,6 @@ void ARougelikeCharacter::Move(const FInputActionValue &Value)
 
 	// route the input
 	DoMove(MovementVector.X, MovementVector.Y);
-}
-
-void ARougelikeCharacter::Look(const FInputActionValue &Value)
-{
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	// route the input
-	DoLook(LookAxisVector.X, LookAxisVector.Y);
 }
 
 void ARougelikeCharacter::DoMove(float Right, float Forward)
@@ -145,28 +132,6 @@ void ARougelikeCharacter::DoMove(float Right, float Forward)
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
 	}
-}
-
-void ARougelikeCharacter::DoLook(float Yaw, float Pitch)
-{
-	if (GetController() != nullptr)
-	{
-		// add yaw and pitch input to controller
-		AddControllerYawInput(Yaw);
-		AddControllerPitchInput(Pitch);
-	}
-}
-
-void ARougelikeCharacter::DoJumpStart()
-{
-	// signal the character to jump
-	Jump();
-}
-
-void ARougelikeCharacter::DoJumpEnd()
-{
-	// signal the character to stop jumping
-	StopJumping();
 }
 
 void ARougelikeCharacter::PostInitializeComponents()

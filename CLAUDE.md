@@ -1,8 +1,8 @@
 # Rougelike — Project Instructions
 
 ## Project Summary
-A hobby 3D roguelike in Unreal Engine 5.8 (C++ module `Rougelike`), loosely inspired by Crab Champions.
-Started from the Third Person template, which includes the `Variant_Combat`, `Variant_Platforming` and `Variant_SideScrolling` sample code/content.
+A hobby top-down ARPG × roguelike in Unreal Engine 5.8 (C++ module `Rougelike`): Diablo-style combat and loot inside run-based roguelike structure.
+Started from the Third Person template (originally as a Crab Champions-style learning project) and is being moved to top-down controls.
 
 ## Goals (in priority order)
 1. **Learning and fun.** There is no ship date and no plan to sell it. Depth of understanding matters more than speed.
@@ -44,19 +44,25 @@ The user wants to **learn by building**. Claude guides, plans, explains and revi
 - Prefer Enhanced Input (already used by the template).
 
 ## Project Structure (current)
-- `Source/Rougelike/`: main module (template Character, GameMode, PlayerController).
-- `Source/Rougelike/Variant_*`: Epic template **reference material**. Study it, borrow ideas, but do not build the game on top of it. Plan to move away from it and eventually remove it once it is no longer useful.
-- `Content/ThirdPerson/`: base template content.
-- Own code should go in clearly named feature folders (e.g. `Source/Rougelike/Combat/`, `Source/Rougelike/Items/`). Decide layout together with the user as systems appear.
+- `Rougelike/Source/Rougelike/`: main module, organized in feature folders (`Player/`, `Gun/`, `Enemy/`). The template `Variant_*` code has been removed.
+- `Rougelike/Content/_Game/`: own content. `Content/ThirdPerson/` is template leftovers, to be removed.
+- `TopDownTemplate/` (gitignored): throwaway UE 5.8 Top Down C++ project. **Reference only**: read its code and migrate pure content (input actions, FX, meshes) from it, never its Blueprints or C++.
+- Own code goes in clearly named feature folders (e.g. `Combat/`, `Items/`). Decide layout together with the user as systems appear.
 
 ## Game Vision (rough, to be refined)
-- Third-person 3D, fast and movement-focused (inspired by Crab Champions: arena combat, strong movement, shooting).
+- Top-down 3D ARPG (Diablo-like) crossed with a roguelike: arena combat, loot, stat-heavy builds.
 - Run-based with randomized upgrade/item choices, escalating enemy waves and a meta layer later.
 - Builds are defined by stacking items and abilities with synergies.
+- Generic roguelike systems (enemies, weapons, loot, inventory) stay modular and reusable.
 - Scope intentionally small at first: one arena, one weapon, one enemy type, a handful of upgrades. Prove the systems, then widen.
 
+## Decisions
+- **2026-10-16, vision:** ARPG × roguelike with a top-down camera, in this same project (no new project).
+- **2026-10-16, controls:** WASD movement relative to the screen; the character aims and shoots at the mouse cursor. No crosshair and no click-to-move for now. The character always faces the cursor. Jump stays for now.
+- **Aim ownership:** the controller turns input into a world aim point. The character faces it, and weapons fire at a point they are given without knowing about cameras or cursors.
+
 ## Suggested Roadmap (adjust as we go)
-1. Strip down and own the base: clean character, input, camera, game mode. Decide what to keep from the template.
+1. Strip down and own the base: clean character, input, camera, game mode. **Active plan: [Docs/Plan-TopDownFoundation.md](Docs/Plan-TopDownFoundation.md).**
 2. Core combat: health/damage model, a basic weapon, hit detection.
 3. Attribute and modifier system (the foundation for stacking). Decide GAS vs custom.
 4. Upgrade/item system: definitions as data, runtime instances, stacking rules, trigger/effect events.
@@ -66,6 +72,6 @@ The user wants to **learn by building**. Claude guides, plans, explains and revi
 8. Polish, UI, VFX/SFX, meta-progression.
 
 ## Working Notes
-- Open design questions and decisions get recorded here as we make them (add a "Decisions" section when the first one is made).
+- Open design questions and decisions get recorded in the "Decisions" section as we make them.
 - Keep this file short and current. Update it when goals or architecture decisions change.
 - Use the Unreal MCP to get more acces into the engine / editor

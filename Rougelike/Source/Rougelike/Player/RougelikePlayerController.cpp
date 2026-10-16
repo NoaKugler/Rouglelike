@@ -6,8 +6,6 @@
 #include "Engine/LocalPlayer.h"
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
-#include "Rougelike.h"
-#include "Widgets/Input/SVirtualJoystick.h"
 
 void ARougelikePlayerController::BeginPlay()
 {
@@ -20,25 +18,6 @@ void ARougelikePlayerController::BeginPlay()
 		{
 			HUDWidget->AddToPlayerScreen();
 		}
-	}
-
-	// only spawn touch controls on local player controllers
-	if (IsLocalPlayerController() && ShouldUseTouchControls())
-	{
-		// spawn the mobile controls widget
-		MobileControlsWidget = CreateWidget<UUserWidget>(this, MobileControlsWidgetClass);
-
-		if (MobileControlsWidget)
-		{
-			// add the controls to the player screen
-			MobileControlsWidget->AddToPlayerScreen(0);
-
-		} else {
-
-			UE_LOG(LogRougelike, Error, TEXT("Could not spawn mobile controls widget."));
-
-		}
-
 	}
 }
 
@@ -56,21 +35,6 @@ void ARougelikePlayerController::SetupInputComponent()
 			{
 				Subsystem->AddMappingContext(CurrentContext, 0);
 			}
-
-			// only add these IMCs if we're not using mobile touch input
-			if (!ShouldUseTouchControls())
-			{
-				for (UInputMappingContext* CurrentContext : MobileExcludedMappingContexts)
-				{
-					Subsystem->AddMappingContext(CurrentContext, 0);
-				}
-			}
 		}
 	}
-}
-
-bool ARougelikePlayerController::ShouldUseTouchControls() const
-{
-	// are we on a mobile platform? Should we force touch?
-	return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
 }

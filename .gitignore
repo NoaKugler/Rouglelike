@@ -82,5 +82,8 @@ $RECYCLE.BIN/
 # World Partition / One File Per Actor: KEEP __ExternalActors__ and
 # __ExternalObjects__ - they are real level data and must be committed.
 
+# Throwaway UE Top Down template, used as a read-only reference and migration source
+/TopDownTemplate/
+
 # Claude Code local settings
 .claude/settings.local.json
