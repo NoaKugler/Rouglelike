@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "BaseEnemy.generated.h"
 
+class UWidgetComponent;
+
 UCLASS()
 class ROUGELIKE_API ABaseEnemy : public ACharacter
 {
@@ -27,4 +29,9 @@ protected:
 	// Runtime state, deliberately not editable
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Health")
 	float CurrentHealth = 0.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> HealthBarComponent;
+
+	void UpdateHealthBar();
 };

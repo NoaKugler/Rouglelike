@@ -1,11 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Enemy/BaseEnemy.h"
+#include "Components/WidgetComponent.h"
+#include "Enemy/UI/EnemyHealthBar.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	// constructor
+	HealthBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
+	HealthBarComponent->SetupAttachment(RootComponent);
+	HealthBarComponent->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
+	HealthBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBarComponent->SetDrawSize(FVector2D(100.f, 10.f));
 }
 
 void ABaseEnemy::BeginPlay()
@@ -13,6 +22,7 @@ void ABaseEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	CurrentHealth = MaxHealth;
+	UpdateHealthBar();
 }
 
 float ABaseEnemy::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
@@ -25,6 +35,7 @@ float ABaseEnemy::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent
 	}
 
 	CurrentHealth -= Applied;
+	UpdateHealthBar();
 	if (CurrentHealth <= 0.f)
 	{
 		Die();
@@ -36,4 +47,13 @@ float ABaseEnemy::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent
 void ABaseEnemy::Die()
 {
 	Destroy();
+}
+
+void ABaseEnemy::UpdateHealthBar()
+{
+	// UpdateHealthBar: called from BeginPlay (after CurrentHealth is set) and from TakeDamage
+	if (UEnemyHealthBar *Bar = Cast<UEnemyHealthBar>(HealthBarComponent->GetUserWidgetObject()))
+	{
+		Bar->SetHealth(CurrentHealth, MaxHealth);
+	}
 }
