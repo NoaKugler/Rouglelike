@@ -24,20 +24,7 @@ public class Rougelike : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[] {
-			"Rougelike",
-			"Rougelike/Variant_Platforming",
-			"Rougelike/Variant_Platforming/Animation",
-			"Rougelike/Variant_Combat",
-			"Rougelike/Variant_Combat/AI",
-			"Rougelike/Variant_Combat/Animation",
-			"Rougelike/Variant_Combat/Gameplay",
-			"Rougelike/Variant_Combat/Interfaces",
-			"Rougelike/Variant_Combat/UI",
-			"Rougelike/Variant_SideScrolling",
-			"Rougelike/Variant_SideScrolling/AI",
-			"Rougelike/Variant_SideScrolling/Gameplay",
-			"Rougelike/Variant_SideScrolling/Interfaces",
-			"Rougelike/Variant_SideScrolling/UI"
+			"Rougelike"
 		});
 
 		// Uncomment if you are using Slate UI
