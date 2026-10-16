@@ -1,0 +1,86 @@
+# Unreal Engine 5 - Windows
+
+# Generated folders (rebuilt by the engine / build tools)
+/Rougelike/Binaries/
+/Rougelike/DerivedDataCache/
+/Rougelike/Intermediate/
+/Rougelike/Saved/
+/Rougelike/Build/*/Intermediate/
+/Rougelike/Build/Receipts/
+/Rougelike/Plugins/*/Binaries/
+/Rougelike/Plugins/*/Intermediate/
+/Rougelike/Plugins/**/Binaries/
+/Rougelike/Plugins/**/Intermediate/
+
+# Editor backup / crash / upgrade artifacts
+/Rougelike/Backup/
+UpgradeLog*.htm
+UpgradeLog*.XML
+_UpgradeReport_Files/
+
+# Generated project files (regenerate via right-click the .uproject)
+*.sln
+*.slnx
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+.vsconfig
+/Rougelike/.vscode/
+/Rougelike/.vs/
+/Rougelike/.idea/
+*.code-workspace
+*.xcodeproj
+*.xcworkspace
+
+# Visual Studio / Rider
+*.user
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+[Bb]in/
+[Oo]bj/
+.vscode/
+
+# Compiled / debug output
+*.pdb
+*.ilk
+*.exp
+*.obj
+*.o
+*.a
+*.lib
+*.dll
+*.exe
+*.dSYM/
+*.VC.VC.opendb
+
+# Packaged builds
+/Rougelike/Packaged/
+/Rougelike/PackagedBuilds/
+/Rougelike/Archived/
+/Rougelike/Staging/
+
+# Cooked / DDC-like content caches
+/Rougelike/Content/**/*.ubulk.tmp
+*.tmp
+*.temp
+
+# Source control temp files
+*.orig
+*.rej
+
+# Logs and OS junk
+*.log
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# World Partition / One File Per Actor: KEEP __ExternalActors__ and
+# __ExternalObjects__ - they are real level data and must be committed.
+
+# Claude Code local settings
+.claude/settings.local.json
