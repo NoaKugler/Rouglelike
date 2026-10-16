@@ -12,6 +12,7 @@ class ROUGELIKE_API UEnemyHealthBar : public UUserWidget
     GENERATED_BODY()
 
 public:
+    UFUNCTION()
     void SetHealth(float Current, float Max);
 
 protected:

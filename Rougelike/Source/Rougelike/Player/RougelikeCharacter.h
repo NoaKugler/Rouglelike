@@ -9,10 +9,10 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class UHealthComponent;
 class AGun;
-struct FInputActionValue;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthChanged, float, NewHealth);
+struct FInputActionValue;
 
 /**
  *  The player character: movement, jumping, the equipped gun and health.
@@ -23,6 +23,10 @@ class ARougelikeCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	/** Health and death. Damage reaches it through OnTakeAnyDamage, so this class doesn't override TakeDamage. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UHealthComponent> HealthComponent;
+
 	/** Camera boom positioning the follow camera relative to the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> CameraBoom;
@@ -31,24 +35,7 @@ class ARougelikeCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
-public:
-	virtual float TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser) override;
-
-	UFUNCTION(BlueprintPure, Category = "Health")
-	float GetCurrentHealth() const { return CurrentHealth; }
-
-	UPROPERTY(BlueprintAssignable, Category = "Health")
-	FOnPlayerHealthChanged OnHealthChanged;
-
 protected:
-	virtual void PostInitializeComponents() override;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
-	float MaxHealth = 100.f;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Health")
-	float CurrentHealth = 0.f;
-
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> JumpAction;
@@ -90,6 +77,10 @@ protected:
 	void Move(const FInputActionValue &Value);
 
 	void DoMove(float Right, float Forward);
+
+	/** Bound to HealthComponent->OnDeath */
+	UFUNCTION()
+	void HandleDeath();
 
 public:
 	/** Returns CameraBoom subobject **/

@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "AIController.h"
 #include "GameFramework/DamageType.h"
+#include "Combat/HealthComponent.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -22,14 +23,22 @@ ABaseEnemy::ABaseEnemy()
 	HealthBarComponent->SetRelativeLocation(FVector(0.f, 0.f, 120.f));
 	HealthBarComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarComponent->SetDrawSize(FVector2D(100.f, 10.f));
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentHealth = MaxHealth;
-	UpdateHealthBar();
+	HealthComponent->OnDeath.AddDynamic(this, &ABaseEnemy::HandleDeath);
+
+	// The bar only knows "current / max". The enemy owns both, so it wires them together once.
+	if (UEnemyHealthBar *Bar = Cast<UEnemyHealthBar>(HealthBarComponent->GetUserWidgetObject()))
+	{
+		HealthComponent->OnHealthChanged.AddDynamic(Bar, &UEnemyHealthBar::SetHealth);
+		Bar->SetHealth(HealthComponent->GetCurrentHealth(), HealthComponent->GetMaxHealth());
+	}
 
 	// AI navigation
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
@@ -37,39 +46,6 @@ void ABaseEnemy::BeginPlay()
 	GetWorldTimerManager().SetTimer(ChaseTimerHandle, this, &ABaseEnemy::ChaseTarget, ChaseInterval, true);
 
 	LastAttackTime = -AttackCooldown;
-}
-
-float ABaseEnemy::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
-{
-	const float Applied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	if (Applied <= 0.f || CurrentHealth <= 0.f)
-	{
-		return 0.f;
-	}
-
-	CurrentHealth -= Applied;
-	UpdateHealthBar();
-	if (CurrentHealth <= 0.f)
-	{
-		Die();
-	}
-
-	return Applied;
-}
-
-void ABaseEnemy::Die()
-{
-	Destroy();
-}
-
-void ABaseEnemy::UpdateHealthBar()
-{
-	// UpdateHealthBar: called from BeginPlay (after CurrentHealth is set) and from TakeDamage
-	if (UEnemyHealthBar *Bar = Cast<UEnemyHealthBar>(HealthBarComponent->GetUserWidgetObject()))
-	{
-		Bar->SetHealth(CurrentHealth, MaxHealth);
-	}
 }
 
 void ABaseEnemy::ChaseTarget()
@@ -106,4 +82,9 @@ void ABaseEnemy::TryAttack()
 
 	LastAttackTime = Now;
 	UGameplayStatics::ApplyDamage(TargetPawn.Get(), AttackDamage, GetController(), this, UDamageType::StaticClass());
+}
+
+void ABaseEnemy::HandleDeath()
+{
+	Destroy();
 }

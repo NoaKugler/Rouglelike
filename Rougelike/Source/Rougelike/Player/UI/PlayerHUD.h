@@ -5,7 +5,7 @@
 #include "PlayerHUD.generated.h"
 
 class UTextBlock;
-class ARougelikeCharacter;
+class UHealthComponent;
 
 UCLASS(Abstract)
 class ROUGELIKE_API UPlayerHUD : public UUserWidget
@@ -18,11 +18,18 @@ protected:
 
     // UFUNCTION is required to bind to a dynamic delegate
     UFUNCTION()
-    void HandleHealthChanged(float NewHealth);
+    void HandleHealthChanged(float CurrentHealth, float MaxHealth);
+
+    UFUNCTION()
+    void HandleDeath();
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UTextBlock> HealthText;
 
+    // Collapsed until the owning pawn dies
+    UPROPERTY(meta = (BindWidget))
+    TObjectPtr<UTextBlock> DeathText;
+
 private:
-    TWeakObjectPtr<ARougelikeCharacter> BoundCharacter;
+    TWeakObjectPtr<UHealthComponent> BoundHealthComponent;
 };

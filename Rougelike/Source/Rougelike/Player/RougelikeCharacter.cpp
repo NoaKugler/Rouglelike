@@ -11,6 +11,7 @@
 #include "Gun/Gun.h"
 #include "MyCollisionChannels.h"
 #include "Player/RougelikePlayerController.h"
+#include "Combat/HealthComponent.h"
 
 ARougelikeCharacter::ARougelikeCharacter()
 {
@@ -54,13 +55,14 @@ ARougelikeCharacter::ARougelikeCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character)
-	// are set in the derived blueprint asset BP_PlayerCharacter (to avoid direct content references in C++)
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 void ARougelikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	HealthComponent->OnDeath.AddDynamic(this, &ARougelikeCharacter::HandleDeath);
 
 	if (DefaultGunClass)
 	{
@@ -131,25 +133,9 @@ void ARougelikeCharacter::DoMove(float Right, float Forward)
 	AddMovementInput(YawMatrix.GetUnitAxis(EAxis::Y), Right);
 }
 
-void ARougelikeCharacter::PostInitializeComponents()
+void ARougelikeCharacter::HandleDeath()
 {
-	Super::PostInitializeComponents();
-
-	// Before any BeginPlay, so the HUD reads the right starting value regardless of actor order
-	CurrentHealth = MaxHealth;
-}
-
-float ARougelikeCharacter::TakeDamage(float DamageAmount, const FDamageEvent &DamageEvent, AController *EventInstigator, AActor *DamageCauser)
-{
-	const float Applied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	if (Applied <= 0.f)
-	{
-		return 0.f;
-	}
-
-	// No clamp and no death on purpose (for now)
-	CurrentHealth -= Applied;
-	OnHealthChanged.Broadcast(CurrentHealth);
-
-	return Applied;
+	// Minimal death state until the run loop exists
+	DisableInput(nullptr);
+	GetCharacterMovement()->DisableMovement();
 }
