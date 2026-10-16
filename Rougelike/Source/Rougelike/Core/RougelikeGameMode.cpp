@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "RougelikeGameMode.h"
+#include "Core/RougelikeGameMode.h"
 
 ARougelikeGameMode::ARougelikeGameMode()
 {

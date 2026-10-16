@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Gun/Gun.h"
-#include "Gun/Projectile.h"
+#include "Weapons/Gun.h"
+#include "Weapons/Projectile.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/Pawn.h"

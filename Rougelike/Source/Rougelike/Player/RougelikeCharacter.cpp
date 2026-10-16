@@ -8,7 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "Rougelike.h"
-#include "Gun/Gun.h"
+#include "Weapons/Gun.h"
 #include "MyCollisionChannels.h"
 #include "Player/RougelikePlayerController.h"
 #include "Combat/HealthComponent.h"
