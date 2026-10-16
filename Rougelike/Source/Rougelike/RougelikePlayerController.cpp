@@ -13,6 +13,15 @@ void ARougelikePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (IsLocalPlayerController() && HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToPlayerScreen();
+		}
+	}
+
 	// only spawn touch controls on local player controllers
 	if (IsLocalPlayerController() && ShouldUseTouchControls())
 	{

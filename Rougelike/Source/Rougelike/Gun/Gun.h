@@ -44,6 +44,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun")
 	TSubclassOf<AProjectile> ProjectileClass;
 
+	/** How far the crosshair trace looks for something to aim at. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = "100", Units = "cm"))
+	float AimTraceDistance = 10000.f;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Gun")
 	int32 CurrentAmmo = 0;
 
@@ -60,4 +64,7 @@ protected:
 private:
 	/** World time of the last shot, used for the fire rate cooldown. */
 	float LastShotTime = -1000.f;
+
+	/** Direction from the muzzle to whatever is under the crosshair. */
+	FVector GetAimDirection(const FVector &MuzzleLocation) const;
 };

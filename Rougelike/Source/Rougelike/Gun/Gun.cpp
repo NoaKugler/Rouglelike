@@ -6,6 +6,9 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/Controller.h"
+#include "Engine/World.h"
+#include "CollisionQueryParams.h"
+#include "MyCollisionChannels.h"
 
 AGun::AGun()
 {
@@ -42,18 +45,11 @@ void AGun::Shoot()
 		return;
 	}
 
-	// Aim where the owner's controller is looking, starting from the muzzle
-	FRotator AimRotation = Muzzle->GetComponentRotation();
-	if (const APawn *OwnerPawn = Cast<APawn>(GetOwner()))
-	{
-		if (const AController *Controller = OwnerPawn->GetController())
-		{
-			AimRotation = Controller->GetControlRotation();
-		}
-	}
+	// Spawn at the muzzle, fly toward whatever is under the crosshair
+	const FVector MuzzleLocation = Muzzle->GetComponentLocation();
+	const FTransform SpawnTransform(GetAimDirection(MuzzleLocation).Rotation(), MuzzleLocation);
 
-	// Deferred spawn so Damage is set before the projectile's BeginPlay runs
-	FTransform SpawnTransform(AimRotation, Muzzle->GetComponentLocation());
+	// Deferred spawn so Damage and Speed are set before the projectile's BeginPlay runs
 	AProjectile *Projectile = World->SpawnActorDeferred<AProjectile>(
 		ProjectileClass, SpawnTransform, this, Cast<APawn>(GetOwner()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
@@ -67,4 +63,34 @@ void AGun::Shoot()
 
 	--CurrentAmmo;
 	LastShotTime = World->GetTimeSeconds();
+}
+
+FVector AGun::GetAimDirection(const FVector &MuzzleLocation) const
+{
+	const APawn *OwnerPawn = Cast<APawn>(GetOwner());
+	const AController *Controller = OwnerPawn ? OwnerPawn->GetController() : nullptr;
+	if (!Controller)
+	{
+		return Muzzle->GetForwardVector();
+	}
+
+	// Player: the camera. AI: the pawn's eyes. So enemy guns get this for free.
+	FVector ViewLocation;
+	FRotator ViewRotation;
+	Controller->GetPlayerViewPoint(ViewLocation, ViewRotation);
+	const FVector ViewDirection = ViewRotation.Vector();
+
+	// Start the trace level with the muzzle so nothing between camera and character can be aimed at
+	const FVector TraceStart = ViewLocation + ViewDirection * FVector::DotProduct(MuzzleLocation - ViewLocation, ViewDirection);
+	const FVector TraceEnd = TraceStart + ViewDirection * AimTraceDistance;
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(GunAim), false, OwnerPawn);
+	Params.AddIgnoredActor(this);
+
+	FHitResult Hit;
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Weapon, Params);
+	const FVector AimPoint = bHit ? Hit.ImpactPoint : TraceEnd;
+
+	// Fallback for when the target is pressed against the muzzle
+	return (AimPoint - MuzzleLocation).GetSafeNormal(UE_SMALL_NUMBER, ViewDirection);
 }

@@ -22,10 +22,9 @@ AProjectile::AProjectile()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
-	Movement->MaxSpeed = Speed;
-	Movement->Velocity = GetActorForwardVector() * Speed;
 	Movement->ProjectileGravityScale = 0.f; // no bullet drop for now
 	Movement->bRotationFollowsVelocity = true;
+	Movement->Velocity = FVector::ZeroVector;
 
 	// Safety net so a bullet that never hits anything cleans itself up
 	InitialLifeSpan = 5.f;
@@ -34,6 +33,11 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Rotation is the direction, Speed is the magnitude. Set here because the gun
+	// assigns Speed after the constructor, in the deferred spawn window.
+	Movement->MaxSpeed = Speed;
+	Movement->Velocity = GetActorForwardVector() * Speed;
 
 	// Don't collide with the gun that fired us or the pawn holding it. The muzzle
 	// sits inside the pawn's capsule, so without this the bullet dies on spawn.
