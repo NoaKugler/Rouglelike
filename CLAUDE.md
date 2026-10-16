@@ -45,7 +45,7 @@ The user wants to **learn by building**. Claude guides, plans, explains and revi
 
 ## Project Structure (current)
 - `Rougelike/Source/Rougelike/`: main module, organized in feature folders (`Player/`, `Gun/`, `Enemy/`). The template `Variant_*` code has been removed.
-- `Rougelike/Content/_Game/`: own content. `Content/ThirdPerson/` is template leftovers, to be removed.
+- `Rougelike/Content/_Game/`: own content (`Core/`, `Maps/`, `Features/`). The default map is `_Game/Maps/Lvl_Arena`.
 - `TopDownTemplate/` (gitignored): throwaway UE 5.8 Top Down C++ project. **Reference only**: read its code and migrate pure content (input actions, FX, meshes) from it, never its Blueprints or C++.
 - Own code goes in clearly named feature folders (e.g. `Combat/`, `Items/`). Decide layout together with the user as systems appear.
 
