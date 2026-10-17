@@ -8,10 +8,10 @@
 #include "CoreAttributeSet.generated.h"
 
 // Generates the property getter, value getter, setter and initter for an attribute.
-#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
+#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName)           \
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
-	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
-	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName)               \
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName)               \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
 /**
@@ -43,6 +43,10 @@ public:
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UCoreAttributeSet, MaxMana)
 
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes", ReplicatedUsing = OnRep_Damage)
+	FGameplayAttributeData Damage;
+	ATTRIBUTE_ACCESSORS(UCoreAttributeSet, Damage)
+
 public:
 	// Replication Notification Functions
 	UFUNCTION()
@@ -56,6 +60,9 @@ public:
 
 	UFUNCTION()
 	virtual void OnRep_MaxMana(const FGameplayAttributeData &OldMaxMana) { GAMEPLAYATTRIBUTE_REPNOTIFY(UCoreAttributeSet, MaxMana, OldMaxMana); };
+
+	UFUNCTION()
+	virtual void OnRep_Damage(const FGameplayAttributeData &OldDamage) { GAMEPLAYATTRIBUTE_REPNOTIFY(UCoreAttributeSet, Damage, OldDamage); };
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 };
