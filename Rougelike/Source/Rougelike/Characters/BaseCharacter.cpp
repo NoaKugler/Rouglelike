@@ -1,6 +1,7 @@
 #include "Characters/BaseCharacter.h"
 #include "Combat/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -19,6 +20,8 @@ ABaseCharacter::ABaseCharacter()
     AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
     AbilitySystemComponent->SetIsReplicated(true);
     AbilitySystemComponent->SetReplicationMode(AbilityReplicationMode);
+
+    CoreAttributeSet = CreateDefaultSubobject<UCoreAttributeSet>(TEXT("CoreAttributeSet"));
 }
 
 void ABaseCharacter::BeginPlay()

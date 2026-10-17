@@ -24,7 +24,10 @@ public:
 
     // Ability System Component
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
-    class UAbilitySystemComponent *AbilitySystemComponent;
+    UAbilitySystemComponent *AbilitySystemComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
+    class UCoreAttributeSet *CoreAttributeSet;
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
