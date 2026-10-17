@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayEffectTypes.h"
 #include "Projectile.generated.h"
 
 class USphereComponent;
@@ -19,8 +20,10 @@ class ROUGELIKE_API AProjectile : public AActor
 public:
 	AProjectile();
 
-	/** Set by the gun before BeginPlay. The default covers anything else that spawns us. */
-	float Speed = 3000.f;
+	const TArray<TSubclassOf<UGameplayEffect>> &GetHitEffects() const { return HitEffects; }
+
+	/** Called by the firing ability between SpawnActorDeferred and FinishSpawning */
+	void SetHitEffectSpecs(const TArray<FGameplayEffectSpecHandle> &InSpecs) { HitEffectSpecs = InSpecs; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -37,7 +40,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
-	/** Applied to whatever we hit. Its magnitude comes from the shooter's Damage attribute. */
+	/** What a hit does, applied in order. The firing ability turns these into specs. */
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
-	TSubclassOf<UGameplayEffect> DamageEffect;
+	TArray<TSubclassOf<UGameplayEffect>> HitEffects;
+
+private:
+	/** Shared pointers inside, nothing for the GC to track, so no UPROPERTY */
+	TArray<FGameplayEffectSpecHandle> HitEffectSpecs;
 };

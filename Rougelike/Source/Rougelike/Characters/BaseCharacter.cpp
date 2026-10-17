@@ -124,6 +124,11 @@ void ABaseCharacter::SendAbilitiesChangedEvent()
     UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventData.EventTag, EventData);
 }
 
+FVector ABaseCharacter::GetAimLocation() const
+{
+    return FVector();
+}
+
 void ABaseCharacter::HandleDeath()
 {
     // Every character stops moving when it dies; subclasses add what death means for them

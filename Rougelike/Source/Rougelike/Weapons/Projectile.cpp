@@ -24,7 +24,9 @@ AProjectile::AProjectile()
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
 	Movement->ProjectileGravityScale = 0.f; // no bullet drop for now
 	Movement->bRotationFollowsVelocity = true;
-	Movement->Velocity = FVector::ZeroVector;
+	// Velocity defaults to local forward, so the spawn rotation is the flight direction
+	Movement->InitialSpeed = 2000.f;
+	Movement->MaxSpeed = 2000.f;
 
 	// Safety net so a bullet that never hits anything cleans itself up
 	InitialLifeSpan = 5.f;
@@ -34,12 +36,7 @@ void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Rotation is the direction, Speed is the magnitude. Set here because the gun
-	// assigns Speed after the constructor, in the deferred spawn window.
-	Movement->MaxSpeed = Speed;
-	Movement->Velocity = GetActorForwardVector() * Speed;
-
-	// Don't collide with the gun that fired us or the pawn holding it. The muzzle
+	// Don't collide with the whoever fired fired us or the pawn holding it. The muzzle
 	// sits inside the pawn's capsule, so without this the bullet dies on spawn.
 	if (AActor *OwnerActor = GetOwner())
 	{
@@ -55,15 +52,15 @@ void AProjectile::BeginPlay()
 
 void AProjectile::OnHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimitiveComponent *OtherComp, FVector NormalImpulse, const FHitResult &Hit)
 {
-	if (OtherActor && OtherActor != this && OtherActor != GetOwner())
+	// Walls and props have no ASC: we just die on them
+	if (UAbilitySystemComponent *TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OtherActor))
 	{
-		UAbilitySystemComponent *SourceASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetInstigator());
-		UAbilitySystemComponent *TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OtherActor);
-		if (SourceASC && TargetASC && DamageEffect)
+		for (const FGameplayEffectSpecHandle &Spec : HitEffectSpecs)
 		{
-			// Made on the source, so GE_Damage captures the shooter's Damage attribute
-			const FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(DamageEffect, 1.f, SourceASC->MakeEffectContext());
-			SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
+			if (Spec.IsValid())
+			{
+				TargetASC->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+			}
 		}
 	}
 

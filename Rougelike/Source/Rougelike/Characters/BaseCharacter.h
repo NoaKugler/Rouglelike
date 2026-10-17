@@ -22,6 +22,10 @@ public:
 
     FORCEINLINE UHealthComponent *GetHealthComponent() const { return HealthComponent; }
 
+    /** World point this character's attacks go toward. Base version: straight ahead. */
+    UFUNCTION(BlueprintPure, Category = "Combat")
+    virtual FVector GetAimLocation() const;
+
     // Ability System Component
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
     UAbilitySystemComponent *AbilitySystemComponent;

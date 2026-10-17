@@ -8,7 +8,6 @@
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "Rougelike.h"
-#include "Weapons/Gun.h"
 #include "MyCollisionChannels.h"
 #include "Characters/Player/MyPlayerController.h"
 
@@ -49,44 +48,11 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 }
 
-void APlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (DefaultGunClass)
-	{
-		FActorSpawnParameters Params;
-		Params.Owner = this;
-		Params.Instigator = this;
-		EquippedGun = GetWorld()->SpawnActor<AGun>(DefaultGunClass, Params);
-		if (EquippedGun)
-		{
-			EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GunSocketName);
-		}
-	}
-}
-
 void APlayerCharacter::HandleDeath()
 {
 	// Base stops movement; the player also loses control. Minimal until the run loop exists.
 	Super::HandleDeath();
 	DisableInput(nullptr);
-}
-
-void APlayerCharacter::Fire()
-{
-	if (!EquippedGun)
-	{
-		return;
-	}
-
-	// The controller owns aiming. Without one (e.g. not possessed by a player), shoot straight ahead.
-	const AMyPlayerController *PlayerController = Cast<AMyPlayerController>(GetController());
-	const FVector Target = PlayerController
-							   ? PlayerController->GetAimLocation()
-							   : GetActorLocation() + GetActorForwardVector() * 1000.f;
-
-	EquippedGun->Shoot(Target);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -101,9 +67,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCom
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-
-		// Triggered fires every frame while held; the gun's FireRate decides when a shot actually happens
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Fire);
 	}
 	else
 	{
@@ -127,4 +90,14 @@ void APlayerCharacter::DoMove(float Right, float Forward)
 
 	AddMovementInput(YawMatrix.GetUnitAxis(EAxis::X), Forward);
 	AddMovementInput(YawMatrix.GetUnitAxis(EAxis::Y), Right);
+}
+
+FVector APlayerCharacter::GetAimLocation() const
+{
+	// The controller owns aiming. Without one (e.g. not possessed by a player), shoot straight ahead.
+	if (const AMyPlayerController *PlayerController = Cast<AMyPlayerController>(GetController()))
+	{
+		return PlayerController->GetAimLocation();
+	}
+	return Super::GetAimLocation();
 }
