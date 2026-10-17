@@ -38,6 +38,24 @@ void ABaseCharacter::PossessedBy(AController *NewController)
     if (AbilitySystemComponent)
     {
         AbilitySystemComponent->InitAbilityActorInfo(this, this);
+        ApplyDefaultAttributes();
+    }
+}
+
+void ABaseCharacter::ApplyDefaultAttributes()
+{
+    if (!DefaultAttributesEffect)
+    {
+        return;
+    }
+
+    FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+    Context.AddSourceObject(this);
+
+    const FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributesEffect, 1.f, Context);
+    if (Spec.IsValid())
+    {
+        AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
     }
 }
 

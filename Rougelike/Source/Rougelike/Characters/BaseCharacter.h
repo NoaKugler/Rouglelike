@@ -33,6 +33,12 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
     EGameplayEffectReplicationMode AbilityReplicationMode = EGameplayEffectReplicationMode::Mixed;
 
+    /** Instant effect that sets this character type's starting attributes (Max Health, Health, ...) */
+    UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
+    TSubclassOf<UGameplayEffect> DefaultAttributesEffect;
+
+    void ApplyDefaultAttributes();
+
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UHealthComponent> HealthComponent;

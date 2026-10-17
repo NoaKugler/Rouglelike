@@ -5,7 +5,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "AIController.h"
-#include "GameFramework/DamageType.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Combat/HealthComponent.h"
 
 // Sets default values
@@ -46,7 +47,11 @@ void ABaseEnemy::BeginPlay()
 void ABaseEnemy::HandleDeath()
 {
 	Super::HandleDeath();
-	Destroy();
+
+	// We're inside the ASC's attribute update here, so don't destroy right away
+	GetWorldTimerManager().ClearTimer(ChaseTimerHandle);
+	SetActorEnableCollision(false);
+	SetLifeSpan(0.1f);
 }
 
 void ABaseEnemy::ChaseTarget()
@@ -82,5 +87,13 @@ void ABaseEnemy::TryAttack()
 	}
 
 	LastAttackTime = Now;
-	UGameplayStatics::ApplyDamage(TargetPawn.Get(), AttackDamage, GetController(), this, UDamageType::StaticClass());
+
+	UAbilitySystemComponent *SourceASC = GetAbilitySystemComponent();
+	UAbilitySystemComponent *TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetPawn.Get());
+	if (SourceASC && TargetASC && AttackDamageEffect)
+	{
+		// Made on the source, so GE_Damage captures this enemy's Damage attribute
+		const FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(AttackDamageEffect, 1.f, SourceASC->MakeEffectContext());
+		SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
+	}
 }

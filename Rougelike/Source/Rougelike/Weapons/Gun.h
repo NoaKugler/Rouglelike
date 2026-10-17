@@ -24,10 +24,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	/** Damage applied by each projectile. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun")
-	float Damage = 10.f;
-
 	/** Shots per second. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = "0.01"))
 	float FireRate = 5.f;

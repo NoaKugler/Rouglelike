@@ -4,8 +4,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "GameFramework/DamageType.h"
-#include "Kismet/GameplayStatics.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 
 AProjectile::AProjectile()
 {
@@ -57,7 +57,14 @@ void AProjectile::OnHit(UPrimitiveComponent *HitComp, AActor *OtherActor, UPrimi
 {
 	if (OtherActor && OtherActor != this && OtherActor != GetOwner())
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, UDamageType::StaticClass());
+		UAbilitySystemComponent *SourceASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetInstigator());
+		UAbilitySystemComponent *TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OtherActor);
+		if (SourceASC && TargetASC && DamageEffect)
+		{
+			// Made on the source, so GE_Damage captures the shooter's Damage attribute
+			const FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(DamageEffect, 1.f, SourceASC->MakeEffectContext());
+			SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
+		}
 	}
 
 	Destroy();

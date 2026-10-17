@@ -9,6 +9,7 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 class UStaticMeshComponent;
+class UGameplayEffect;
 
 UCLASS()
 class ROUGELIKE_API AProjectile : public AActor
@@ -17,9 +18,6 @@ class ROUGELIKE_API AProjectile : public AActor
 
 public:
 	AProjectile();
-
-	/** Set by the gun that fired us, before BeginPlay (see AGun::Shoot). */
-	float Damage = 0.f;
 
 	/** Set by the gun before BeginPlay. The default covers anything else that spawns us. */
 	float Speed = 3000.f;
@@ -38,4 +36,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TObjectPtr<UStaticMeshComponent> Mesh;
+
+	/** Applied to whatever we hit. Its magnitude comes from the shooter's Damage attribute. */
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+	TSubclassOf<UGameplayEffect> DamageEffect;
 };

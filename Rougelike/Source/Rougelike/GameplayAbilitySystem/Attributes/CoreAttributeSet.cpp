@@ -9,6 +9,7 @@ UCoreAttributeSet::UCoreAttributeSet()
     MaxHealth = 100.f;
     Mana = 100.f;
     MaxMana = 100.f;
+    Damage = 10.f;
 }
 
 void UCoreAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const

@@ -25,13 +25,6 @@ void UHealthComponent::InitializeComponent()
     AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCoreAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &UHealthComponent::HandleHealthAttributeChanged);
 }
 
-void UHealthComponent::BeginPlay()
-{
-    Super::BeginPlay();
-
-    GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::HandleTakeAnyDamage);
-}
-
 float UHealthComponent::GetCurrentHealth() const
 {
     return AbilitySystemComponent ? AbilitySystemComponent->GetNumericAttribute(UCoreAttributeSet::GetHealthAttribute()) : 0.f;
@@ -40,17 +33,6 @@ float UHealthComponent::GetCurrentHealth() const
 float UHealthComponent::GetMaxHealth() const
 {
     return AbilitySystemComponent ? AbilitySystemComponent->GetNumericAttribute(UCoreAttributeSet::GetMaxHealthAttribute()) : 0.f;
-}
-
-void UHealthComponent::HandleTakeAnyDamage(AActor *DamagedActor, float Damage, const UDamageType *DamageType, AController *InstigatedBy, AActor *DamageCauser)
-{
-    if (Damage <= 0.f || bIsDead || !AbilitySystemComponent)
-    {
-        return;
-    }
-
-    // TEMP bridge until damage goes through GE_Damage (Part 2). Skips Pre/PostGameplayEffectExecute.
-    AbilitySystemComponent->ApplyModToAttribute(UCoreAttributeSet::GetHealthAttribute(), EGameplayModOp::AddBase, -Damage);
 }
 
 void UHealthComponent::HandleHealthAttributeChanged(const FOnAttributeChangeData &Data)

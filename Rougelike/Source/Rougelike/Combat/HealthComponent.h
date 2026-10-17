@@ -4,8 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
-class AController;
-class UDamageType;
 class UAbilitySystemComponent;
 struct FOnAttributeChangeData;
 
@@ -39,12 +37,8 @@ public:
 
 protected:
     virtual void InitializeComponent() override;
-    virtual void BeginPlay() override;
 
 private:
-    UFUNCTION()
-    void HandleTakeAnyDamage(AActor *DamagedActor, float Damage, const UDamageType *DamageType, AController *InstigatedBy, AActor *DamageCauser);
-
     // Bound to both Health and MaxHealth. Native delegate, so no UFUNCTION.
     void HandleHealthAttributeChanged(const FOnAttributeChangeData &Data);
 

@@ -50,14 +50,13 @@ void AGun::Shoot(const FVector &TargetLocation)
 	const FVector Direction = (TargetLocation - MuzzleLocation).GetSafeNormal2D(UE_SMALL_NUMBER, Fallback);
 	const FTransform SpawnTransform(Direction.Rotation(), MuzzleLocation);
 
-	// Deferred spawn so Damage and Speed are set before the projectile's BeginPlay runs
+	// Deferred spawn so Speed is set before the projectile's BeginPlay runs
 	AProjectile *Projectile = World->SpawnActorDeferred<AProjectile>(
 		ProjectileClass, SpawnTransform, this, Cast<APawn>(GetOwner()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 
 	if (Projectile)
 	{
-		Projectile->Damage = Damage;
 		Projectile->Speed = ProjectileSpeed;
 		Projectile->FinishSpawning(SpawnTransform);
 	}

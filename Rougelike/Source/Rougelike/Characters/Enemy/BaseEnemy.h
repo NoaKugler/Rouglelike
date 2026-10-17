@@ -5,10 +5,10 @@
 #include "BaseEnemy.generated.h"
 
 class UWidgetComponent;
+class UGameplayEffect;
 
 UCLASS()
 class ROUGELIKE_API ABaseEnemy : public ABaseCharacter
-
 {
 	GENERATED_BODY()
 
@@ -20,8 +20,9 @@ protected:
 
 	virtual void HandleDeath() override;
 
+	/** Applied to the target on each hit. Its magnitude comes from this enemy's Damage attribute. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
-	float AttackDamage = 10.f;
+	TSubclassOf<UGameplayEffect> AttackDamageEffect;
 
 	// Measured centre to centre, so it must exceed AcceptanceRadius + both capsule radii or the enemy stops short of hitting
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
