@@ -2,6 +2,7 @@
 #include "Combat/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -39,6 +40,7 @@ void ABaseCharacter::PossessedBy(AController *NewController)
     {
         AbilitySystemComponent->InitAbilityActorInfo(this, this);
         ApplyDefaultAttributes();
+        GrantAbilities(DefaultAbilities);
     }
 }
 
@@ -72,6 +74,53 @@ void ABaseCharacter::OnRep_PlayerState()
 UAbilitySystemComponent *ABaseCharacter::GetAbilitySystemComponent() const
 {
     return AbilitySystemComponent;
+}
+
+TArray<FGameplayAbilitySpecHandle> ABaseCharacter::GrantAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant)
+{
+    if (!AbilitySystemComponent)
+    {
+        return TArray<FGameplayAbilitySpecHandle>();
+    }
+
+    TArray<FGameplayAbilitySpecHandle> GrantedHandles;
+
+    for (TSubclassOf<UGameplayAbility> AbilityClass : AbilitiesToGrant)
+    {
+        if (AbilityClass)
+        {
+            GrantedHandles.Add(AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(
+                AbilityClass, 1, INDEX_NONE, this)));
+        }
+    }
+
+    SendAbilitiesChangedEvent();
+    return GrantedHandles;
+}
+
+void ABaseCharacter::RemoveAbilities(TArray<FGameplayAbilitySpecHandle> AbilityHandlesToRemove)
+{
+    if (!AbilitySystemComponent)
+    {
+        return;
+    }
+
+    for (const FGameplayAbilitySpecHandle &AbilityHandle : AbilityHandlesToRemove)
+    {
+        AbilitySystemComponent->ClearAbility(AbilityHandle);
+    }
+
+    SendAbilitiesChangedEvent();
+}
+
+void ABaseCharacter::SendAbilitiesChangedEvent()
+{
+    FGameplayEventData EventData;
+    EventData.EventTag = FGameplayTag::RequestGameplayTag(FName("Event.Abilities.Changed"));
+    EventData.Instigator = this;
+    EventData.Target = this;
+
+    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventData.EventTag, EventData);
 }
 
 void ABaseCharacter::HandleDeath()

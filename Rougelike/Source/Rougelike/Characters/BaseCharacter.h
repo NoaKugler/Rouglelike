@@ -30,14 +30,14 @@ public:
     class UCoreAttributeSet *CoreAttributeSet;
 
 protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
-    EGameplayEffectReplicationMode AbilityReplicationMode = EGameplayEffectReplicationMode::Mixed;
-
-    /** Instant effect that sets this character type's starting attributes (Max Health, Health, ...) */
     UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
     TSubclassOf<UGameplayEffect> DefaultAttributesEffect;
 
-    void ApplyDefaultAttributes();
+    UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
+    TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
+    EGameplayEffectReplicationMode AbilityReplicationMode = EGameplayEffectReplicationMode::Mixed;
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -46,12 +46,23 @@ private:
 public:
     virtual UAbilitySystemComponent *GetAbilitySystemComponent() const override;
 
+    UFUNCTION(BlueprintCallable, Category = "AbilitySystem")
+    TArray<FGameplayAbilitySpecHandle> GrantAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant);
+
+    UFUNCTION(BlueprintCallable, Category = "AbilitySystem")
+    void RemoveAbilities(TArray<FGameplayAbilitySpecHandle> AbilityHandlesToRemove);
+
+    UFUNCTION(BlueprintCallable, Category = "AbilitySystem")
+    void SendAbilitiesChangedEvent();
+
 protected:
     virtual void BeginPlay() override;
 
     virtual void PossessedBy(AController *NewController) override;
 
     virtual void OnRep_PlayerState() override;
+
+    void ApplyDefaultAttributes();
 
     /** Bound to HealthComponent->OnDeath. Subclasses extend it and call Super. */
     UFUNCTION()
