@@ -3,6 +3,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "GameplayAbilitySystem/RougelikeAbilitySystemComponent.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -18,7 +19,7 @@ ABaseCharacter::ABaseCharacter()
     HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
     // Ability System Component
-    AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+    AbilitySystemComponent = CreateDefaultSubobject<URougelikeAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
     AbilitySystemComponent->SetIsReplicated(true);
     AbilitySystemComponent->SetReplicationMode(AbilityReplicationMode);
 
