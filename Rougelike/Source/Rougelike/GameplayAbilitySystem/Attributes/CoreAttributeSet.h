@@ -65,4 +65,11 @@ public:
 	virtual void OnRep_Damage(const FGameplayAttributeData &OldDamage) { GAMEPLAYATTRIBUTE_REPNOTIFY(UCoreAttributeSet, Damage, OldDamage); };
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
+
+	virtual void PreAttributeChange(const FGameplayAttribute &Attribute, float &NewValue) override;
+	virtual void PreAttributeBaseChange(const FGameplayAttribute &Attribute, float &NewValue) const override;
+
+private:
+	// Shared by both Pre hooks so base and current value always obey the same limits
+	void ClampAttribute(const FGameplayAttribute &Attribute, float &NewValue) const;
 };

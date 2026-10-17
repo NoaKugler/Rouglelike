@@ -21,3 +21,32 @@ void UCoreAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &Ou
     DOREPLIFETIME_CONDITION_NOTIFY(UCoreAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
     DOREPLIFETIME_CONDITION_NOTIFY(UCoreAttributeSet, Damage, COND_None, REPNOTIFY_Always);
 }
+
+void UCoreAttributeSet::PreAttributeChange(const FGameplayAttribute &Attribute, float &NewValue)
+{
+    Super::PreAttributeChange(Attribute, NewValue);
+    ClampAttribute(Attribute, NewValue);
+}
+
+void UCoreAttributeSet::PreAttributeBaseChange(const FGameplayAttribute &Attribute, float &NewValue) const
+{
+    Super::PreAttributeBaseChange(Attribute, NewValue);
+    ClampAttribute(Attribute, NewValue);
+}
+
+void UCoreAttributeSet::ClampAttribute(const FGameplayAttribute &Attribute, float &NewValue) const
+{
+    if (Attribute == GetHealthAttribute())
+    {
+        NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+    }
+    else if (Attribute == GetManaAttribute())
+    {
+        NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
+    }
+    else if (Attribute == GetMaxHealthAttribute() || Attribute == GetMaxManaAttribute())
+    {
+        // A max of 0 would divide by zero in the health bar
+        NewValue = FMath::Max(NewValue, 1.f);
+    }
+}

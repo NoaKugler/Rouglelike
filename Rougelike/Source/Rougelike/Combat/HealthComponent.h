@@ -6,6 +6,8 @@
 
 class AController;
 class UDamageType;
+class UAbilitySystemComponent;
+struct FOnAttributeChangeData;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
@@ -19,10 +21,10 @@ public:
     UHealthComponent();
 
     UFUNCTION(BlueprintPure, Category = "Health")
-    float GetCurrentHealth() const { return CurrentHealth; }
+    float GetCurrentHealth() const;
 
     UFUNCTION(BlueprintPure, Category = "Health")
-    float GetMaxHealth() const { return MaxHealth; }
+    float GetMaxHealth() const;
 
     UFUNCTION(BlueprintPure, Category = "Health")
     bool IsDead() const { return bIsDead; }
@@ -39,15 +41,15 @@ protected:
     virtual void InitializeComponent() override;
     virtual void BeginPlay() override;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", meta = (ClampMin = "1"))
-    float MaxHealth = 100.f;
-
-    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Health")
-    float CurrentHealth = 0.f;
-
 private:
     UFUNCTION()
     void HandleTakeAnyDamage(AActor *DamagedActor, float Damage, const UDamageType *DamageType, AController *InstigatedBy, AActor *DamageCauser);
+
+    // Bound to both Health and MaxHealth. Native delegate, so no UFUNCTION.
+    void HandleHealthAttributeChanged(const FOnAttributeChangeData &Data);
+
+    UPROPERTY()
+    TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
     bool bIsDead = false;
 };
