@@ -15,6 +15,8 @@ ABaseEnemy::ABaseEnemy()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// Path following sets velocity directly by default, leaving acceleration at zero, and the anim BP gates walking on acceleration
+	GetCharacterMovement()->GetNavMovementProperties()->bUseAccelerationForPaths = true;
 
 	HealthBarComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
 	HealthBarComponent->SetupAttachment(RootComponent);
