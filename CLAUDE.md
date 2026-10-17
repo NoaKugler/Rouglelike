@@ -60,6 +60,7 @@ The user wants to **learn by building**. Claude guides, plans, explains and revi
 - **2026-10-16, vision:** ARPG × roguelike with a top-down camera, in this same project (no new project).
 - **2026-10-16, controls:** WASD movement relative to the screen; the character aims and shoots at the mouse cursor. No crosshair and no click-to-move for now. The character always faces the cursor. Jump stays for now.
 - **Aim ownership:** the controller turns input into a world aim point. The character faces it, and weapons fire at a point they are given without knowing about cameras or cursors.
+- **2026-10-17, UI:** all screens go through `UUIManagerSubsystem` (`Source/Rougelike/UI/`): CommonUI stacks addressed by layer tag (`UI.Layer.Game/Menu/Modal/Loading`), registered by `WBP_UILayout`. Every pushed widget derives from `UUIActivatableWidget` and declares its input mode. Game mode never hides the cursor and only captures during mouse down, because the cursor is the aim device.
 
 ## Suggested Roadmap (adjust as we go)
 1. Strip down and own the base: clean character, input, camera, game mode. **Active plan: [Docs/Plan-TopDownFoundation.md](Docs/Plan-TopDownFoundation.md).**

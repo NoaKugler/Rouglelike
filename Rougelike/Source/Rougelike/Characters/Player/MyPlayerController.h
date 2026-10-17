@@ -7,10 +7,10 @@
 #include "MyPlayerController.generated.h"
 
 class UInputMappingContext;
-class UUserWidget;
+class UCommonActivatableWidget;
 
 /**
- *  Player controller: adds the input mapping contexts, spawns the HUD
+ *  Player controller: adds the input mapping contexts, pushes the HUD
  *  and turns the mouse cursor into a world-space aim point.
  */
 UCLASS(abstract)
@@ -33,12 +33,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input|Input Mappings")
 	TArray<TObjectPtr<UInputMappingContext>> DefaultMappingContexts;
 
-	/** HUD widget to spawn for the local player */
+	/** Pushed onto the UI Game layer for the local player. The layer owns the instance. */
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> HUDWidgetClass;
-
-	UPROPERTY()
-	TObjectPtr<UUserWidget> HUDWidget;
+	TSubclassOf<UCommonActivatableWidget> HUDWidgetClass;
 
 	/** The aim point never gets closer to the pawn than this, so the aim direction can't flip when the cursor is on the character */
 	UPROPERTY(EditDefaultsOnly, Category = "Aim", meta = (ClampMin = "0", Units = "cm"))

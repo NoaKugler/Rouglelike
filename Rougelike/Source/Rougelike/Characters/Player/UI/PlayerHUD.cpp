@@ -3,6 +3,13 @@
 #include "Combat/HealthComponent.h"
 #include "GameFramework/Pawn.h"
 
+UPlayerHUD::UPlayerHUD(const FObjectInitializer &ObjectInitializer)
+    : Super(ObjectInitializer)
+{
+    // While the HUD is the top widget, input belongs to the game. Popping the last menu lands back here.
+    InputMode = EUIInputMode::Game;
+}
+
 void UPlayerHUD::NativeConstruct()
 {
     Super::NativeConstruct();
@@ -15,11 +22,7 @@ void UPlayerHUD::NativeConstruct()
     if (Health)
     {
         BoundHealthComponent = Health;
-        Health->OnHealthChanged.AddDynamic(this, &UPlayerHUD::HandleHealthChanged);
         Health->OnDeath.AddDynamic(this, &UPlayerHUD::HandleDeath);
-
-        // The delegate only fires on change, so pull the starting value once
-        HandleHealthChanged(Health->GetCurrentHealth(), Health->GetMaxHealth());
     }
 }
 
@@ -27,16 +30,10 @@ void UPlayerHUD::NativeDestruct()
 {
     if (BoundHealthComponent.IsValid())
     {
-        BoundHealthComponent->OnHealthChanged.RemoveDynamic(this, &UPlayerHUD::HandleHealthChanged);
         BoundHealthComponent->OnDeath.RemoveDynamic(this, &UPlayerHUD::HandleDeath);
     }
 
     Super::NativeDestruct();
-}
-
-void UPlayerHUD::HandleHealthChanged(float CurrentHealth, float MaxHealth)
-{
-    HealthText->SetText(FText::AsNumber(FMath::RoundToInt(CurrentHealth)));
 }
 
 void UPlayerHUD::HandleDeath()

@@ -4,7 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "InputMappingContext.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/UIManagerSubsystem.h"
 #include "GameFramework/Pawn.h"
 #include "DrawDebugHelpers.h"
 
@@ -14,10 +14,9 @@ void AMyPlayerController::BeginPlay()
 
 	if (IsLocalPlayerController() && HUDWidgetClass)
 	{
-		HUDWidget = CreateWidget<UUserWidget>(this, HUDWidgetClass);
-		if (HUDWidget)
+		if (UUIManagerSubsystem *UIManager = UUIManagerSubsystem::Get(this))
 		{
-			HUDWidget->AddToPlayerScreen();
+			UIManager->PushWidget(UITags::Layer_Game, HUDWidgetClass);
 		}
 	}
 }
