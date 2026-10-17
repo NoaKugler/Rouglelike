@@ -6,7 +6,6 @@
 #include "InputMappingContext.h"
 #include "UI/UIManagerSubsystem.h"
 #include "GameFramework/Pawn.h"
-#include "DrawDebugHelpers.h"
 
 void AMyPlayerController::BeginPlay()
 {
@@ -97,6 +96,4 @@ void AMyPlayerController::UpdateAimLocation()
 	}
 
 	AimLocation = NewAimLocation;
-
-	DrawDebugSphere(GetWorld(), AimLocation, 20.f, 12, FColor::Green); // TEMP
 }
