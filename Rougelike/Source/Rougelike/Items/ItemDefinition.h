@@ -6,6 +6,8 @@
 #include "UObject/Object.h"
 #include "ItemDefinition.generated.h"
 
+class UItemFragment;
+
 /**
  *
  */
@@ -23,4 +25,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	TObjectPtr<UTexture2D> ItemIcon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Item")
+	TArray<TObjectPtr<UItemFragment>> ItemFragments;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DeterminesOutputType = "FragmentClass"), Category = "Item")
+	static const UItemFragment *FindFragmentByClass(const TSubclassOf<UItemDefinition> ItemDefinition, const TSubclassOf<UItemFragment> FragmentClass);
 };
