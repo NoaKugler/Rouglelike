@@ -44,25 +44,30 @@ void ABaseCharacter::PossessedBy(AController *NewController)
     if (AbilitySystemComponent)
     {
         AbilitySystemComponent->InitAbilityActorInfo(this, this);
-        ApplyDefaultAttributes();
+        ApplyStartupEffects();
         GrantAbilities(DefaultAbilities);
     }
 }
 
-void ABaseCharacter::ApplyDefaultAttributes()
+void ABaseCharacter::ApplyStartupEffects()
 {
-    if (!DefaultAttributesEffect)
+    for (const TSubclassOf<UGameplayEffect> &EffectClass : StartupEffects)
     {
-        return;
-    }
+        // An empty slot in the array is easy to leave behind in the editor
+        if (!EffectClass)
+        {
+            continue;
+        }
 
-    FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
-    Context.AddSourceObject(this);
+        // One context per effect, so specs never share (and mutate) the same context object
+        FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+        Context.AddSourceObject(this);
 
-    const FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttributesEffect, 1.f, Context);
-    if (Spec.IsValid())
-    {
-        AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+        const FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.f, Context);
+        if (Spec.IsValid())
+        {
+            AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+        }
     }
 }
 

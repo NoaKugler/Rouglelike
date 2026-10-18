@@ -39,8 +39,9 @@ public:
     TObjectPtr<UOffenseAttributeSet> OffenseAttributeSet;
 
 protected:
+    /** Applied in list order when the character is possessed. Instant effects set starting stats; infinite ones (passives, test items) stay on until removed. */
     UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
-    TSubclassOf<UGameplayEffect> DefaultAttributesEffect;
+    TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
 
     UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
     TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
@@ -71,7 +72,7 @@ protected:
 
     virtual void OnRep_PlayerState() override;
 
-    void ApplyDefaultAttributes();
+    void ApplyStartupEffects();
 
     /** Bound to HealthComponent->OnDeath. Subclasses extend it and call Super. */
     UFUNCTION()
