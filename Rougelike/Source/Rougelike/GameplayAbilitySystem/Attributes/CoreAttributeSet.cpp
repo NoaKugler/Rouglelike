@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
+#include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 
 UCoreAttributeSet::UCoreAttributeSet()
@@ -10,6 +11,7 @@ UCoreAttributeSet::UCoreAttributeSet()
     Mana = 100.f;
     MaxMana = 100.f;
     Damage = 0.f;
+    IncomingDamage = 0.f;
 }
 
 void UCoreAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
@@ -33,6 +35,24 @@ void UCoreAttributeSet::PreAttributeBaseChange(const FGameplayAttribute &Attribu
 {
     Super::PreAttributeBaseChange(Attribute, NewValue);
     ClampAttribute(Attribute, NewValue);
+}
+
+void UCoreAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData &Data)
+{
+    Super::PostGameplayEffectExecute(Data);
+
+    if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+    {
+        // Consume the meta value right away so the next hit starts from zero
+        const float DamageDone = GetIncomingDamage();
+        SetIncomingDamage(0.f);
+
+        if (DamageDone > 0.f)
+        {
+            // Goes through PreAttributeBaseChange, so Health stays clamped at 0
+            SetHealth(GetHealth() - DamageDone);
+        }
+    }
 }
 
 void UCoreAttributeSet::ClampAttribute(const FGameplayAttribute &Attribute, float &NewValue) const

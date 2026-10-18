@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Characters/BaseCharacter.h"
+#include "GameplayAbilitySystem/Effects/DamageEffect.h"
 #include "BaseEnemy.generated.h"
 
 class UWidgetComponent;
-class UGameplayEffect;
 
 UCLASS()
 class ROUGELIKE_API ABaseEnemy : public ABaseCharacter
@@ -24,9 +24,9 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
 	void HandleDamaged(float DamageAmount);
 
-	/** Applied to the target on each hit. Its magnitude comes from this enemy's Damage attribute. */
+	/** Applied to the target on each hit. Its base damage is scaled by this enemy's offense stats. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
-	TSubclassOf<UGameplayEffect> AttackDamageEffect;
+	FDamageEffect AttackDamage;
 
 	// Measured centre to centre, so it must exceed AcceptanceRadius + both capsule radii or the enemy stops short of hitting
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")

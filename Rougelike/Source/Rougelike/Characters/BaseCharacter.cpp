@@ -2,6 +2,7 @@
 #include "Combat/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
+#include "GameplayAbilitySystem/Attributes/OffenseAttributeSet.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayAbilitySystem/RougelikeAbilitySystemComponent.h"
 
@@ -24,6 +25,9 @@ ABaseCharacter::ABaseCharacter()
     AbilitySystemComponent->SetReplicationMode(AbilityReplicationMode);
 
     CoreAttributeSet = CreateDefaultSubobject<UCoreAttributeSet>(TEXT("CoreAttributeSet"));
+
+    // Every character can deal damage, so enemies scale their hits the same way the player does
+    OffenseAttributeSet = CreateDefaultSubobject<UOffenseAttributeSet>(TEXT("OffenseAttributeSet"));
 }
 
 void ABaseCharacter::BeginPlay()

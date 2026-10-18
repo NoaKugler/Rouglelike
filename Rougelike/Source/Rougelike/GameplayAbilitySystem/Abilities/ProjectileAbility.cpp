@@ -50,13 +50,15 @@ void UProjectileAbility::SpawnProjectile()
         return;
     }
 
-    // Made by the ability: each spec captures the caster's attributes, the ability level and the ability's tags
+    // Made by the ability, so each spec carries the ability's tags and level plus its base damage.
+    // The caster's stats are read later, when the projectile hits.
     TArray<FGameplayEffectSpecHandle> Specs;
-    for (const TSubclassOf<UGameplayEffect> &EffectClass : Projectile->GetHitEffects())
+    for (const FDamageEffect &HitEffect : Projectile->GetHitEffects())
     {
-        if (EffectClass)
+        const FGameplayEffectSpecHandle Spec = MakeDamageEffectSpec(HitEffect);
+        if (Spec.IsValid())
         {
-            Specs.Add(MakeOutgoingGameplayEffectSpec(EffectClass, GetAbilityLevel()));
+            Specs.Add(Spec);
         }
     }
 

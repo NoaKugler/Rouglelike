@@ -2,4 +2,23 @@
 
 
 #include "GameplayAbilitySystem/Abilities/RougelikeGameplayAbility.h"
+#include "GameplayAbilitySystem/RougelikeGameplayTags.h"
+#include "GameplayEffect.h"
 
+FGameplayEffectSpecHandle URougelikeGameplayAbility::MakeDamageEffectSpec(const FDamageEffect &DamageEffect) const
+{
+	if (!DamageEffect.Effect)
+	{
+		return FGameplayEffectSpecHandle();
+	}
+
+	// Made by the ability, so the spec carries the ability's tags and level
+	const float Level = GetAbilityLevel();
+	FGameplayEffectSpecHandle Spec = MakeOutgoingGameplayEffectSpec(DamageEffect.Effect, Level);
+	if (Spec.IsValid())
+	{
+		// Has to come after: MakeOutgoingGameplayEffectSpec replaces the spec's SetByCaller values while creating it
+		Spec.Data->SetSetByCallerMagnitude(RougelikeGameplayTags::SetByCaller_Damage, DamageEffect.BaseDamage.GetValueAtLevel(Level));
+	}
+	return Spec;
+}

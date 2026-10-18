@@ -43,9 +43,16 @@ public:
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UCoreAttributeSet, MaxMana)
 
+	// Old pipeline: GE_Damage reads this as the attacker's damage. Remove once no asset uses it.
 	UPROPERTY(BlueprintReadOnly, Category = "Attributes", ReplicatedUsing = OnRep_Damage)
 	FGameplayAttributeData Damage;
 	ATTRIBUTE_ACCESSORS(UCoreAttributeSet, Damage)
+
+	// Meta attribute: UDamageExecution writes the final damage here, PostGameplayEffectExecute turns it into Health loss.
+	// Only holds a value during one execution, so it isn't replicated.
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes")
+	FGameplayAttributeData IncomingDamage;
+	ATTRIBUTE_ACCESSORS(UCoreAttributeSet, IncomingDamage)
 
 public:
 	// Replication Notification Functions
@@ -68,6 +75,9 @@ public:
 
 	virtual void PreAttributeChange(const FGameplayAttribute &Attribute, float &NewValue) override;
 	virtual void PreAttributeBaseChange(const FGameplayAttribute &Attribute, float &NewValue) const override;
+
+	/** Where all damage lands: converts IncomingDamage into Health loss */
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData &Data) override;
 
 private:
 	// Shared by both Pre hooks so base and current value always obey the same limits

@@ -8,6 +8,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Combat/HealthComponent.h"
+#include "GameplayAbilitySystem/RougelikeGameplayTags.h"
 
 // Sets default values
 ABaseEnemy::ABaseEnemy()
@@ -99,10 +100,14 @@ void ABaseEnemy::TryAttack()
 
 	UAbilitySystemComponent *SourceASC = GetAbilitySystemComponent();
 	UAbilitySystemComponent *TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetPawn.Get());
-	if (SourceASC && TargetASC && AttackDamageEffect)
+	if (SourceASC && TargetASC && AttackDamage.Effect)
 	{
-		// Made on the source, so GE_Damage captures this enemy's Damage attribute
-		const FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(AttackDamageEffect, 1.f, SourceASC->MakeEffectContext());
-		SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
+		// Made on the source, so the damage execution reads this enemy's offense stats
+		const FGameplayEffectSpecHandle Spec = SourceASC->MakeOutgoingSpec(AttackDamage.Effect, 1.f, SourceASC->MakeEffectContext());
+		if (Spec.IsValid())
+		{
+			Spec.Data->SetSetByCallerMagnitude(RougelikeGameplayTags::SetByCaller_Damage, AttackDamage.BaseDamage.GetValueAtLevel(1.f));
+			SourceASC->ApplyGameplayEffectSpecToTarget(*Spec.Data.Get(), TargetASC);
+		}
 	}
 }

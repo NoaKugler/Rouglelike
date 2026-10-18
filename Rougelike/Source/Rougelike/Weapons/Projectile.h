@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GameplayEffectTypes.h"
+#include "GameplayAbilitySystem/Effects/DamageEffect.h"
 #include "Projectile.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
 class UStaticMeshComponent;
-class UGameplayEffect;
 
 UCLASS()
 class ROUGELIKE_API AProjectile : public AActor
@@ -20,7 +20,7 @@ class ROUGELIKE_API AProjectile : public AActor
 public:
 	AProjectile();
 
-	const TArray<TSubclassOf<UGameplayEffect>> &GetHitEffects() const { return HitEffects; }
+	const TArray<FDamageEffect> &GetHitEffects() const { return HitEffects; }
 
 	/** Called by the firing ability between SpawnActorDeferred and FinishSpawning */
 	void SetHitEffectSpecs(const TArray<FGameplayEffectSpecHandle> &InSpecs) { HitEffectSpecs = InSpecs; }
@@ -40,9 +40,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
-	/** What a hit does, applied in order. The firing ability turns these into specs. */
+	/** What a hit does, applied in list order, each with the base damage it deals. The firing ability turns these into specs. */
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
-	TArray<TSubclassOf<UGameplayEffect>> HitEffects;
+	TArray<FDamageEffect> HitEffects;
 
 private:
 	/** Shared pointers inside, nothing for the GC to track, so no UPROPERTY */

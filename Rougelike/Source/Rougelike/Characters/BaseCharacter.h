@@ -7,6 +7,7 @@
 #include "BaseCharacter.generated.h"
 
 class UHealthComponent;
+class UOffenseAttributeSet;
 
 /**
  *  Shared base for every character that fights: the player and all enemies.
@@ -32,6 +33,10 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
     class UCoreAttributeSet *CoreAttributeSet;
+
+    /** Attacker stats (FlatDamage, DamageMultiplier) that scale every hit this character deals */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
+    TObjectPtr<UOffenseAttributeSet> OffenseAttributeSet;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
