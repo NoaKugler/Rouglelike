@@ -23,9 +23,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Item")
 	TMap<FGameplayTag, float> ItemStats;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Item")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Item", meta = (Categories = "Item.Stat"))
 	float GetStatValue(const FGameplayTag &StatTag);
 
-	UFUNCTION(BlueprintCallable, Category = "Item")
+	UFUNCTION(BlueprintCallable, Category = "Item", meta = (Categories = "Item.Stat"))
 	void SetStatValue(const FGameplayTag &StatTag, float NewValue);
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void Initialize(TSubclassOf<UItemDefinition> InItemDefinition);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DeterminesOutputType = "FragmentClass"), Category = "Item")
+	const UItemFragment *FindFragmentByClass(const TSubclassOf<UItemFragment> FragmentClass);
 };

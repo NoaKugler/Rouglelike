@@ -6,11 +6,16 @@
 #include "UObject/Object.h"
 #include "ItemFragment.generated.h"
 
+class UItemInstance;
+
 /**
  *
  */
-UCLASS(Blueprintable, BlueprintType, Abstract, DefaultToInstanced, EditInlineNew)
+UCLASS(BlueprintType, Abstract, DefaultToInstanced, EditInlineNew)
 class ROUGELIKE_API UItemFragment : public UObject
 {
 	GENERATED_BODY()
+
+public:
+	virtual void OnInstanceCreated(UItemInstance *ItemInstance) {}
 };
