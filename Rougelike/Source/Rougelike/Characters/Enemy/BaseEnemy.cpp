@@ -31,6 +31,8 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GetHealthComponent()->OnDamaged.AddDynamic(this, &ABaseEnemy::HandleDamaged);
+
 	if (UEnemyHealthBar *Bar = Cast<UEnemyHealthBar>(HealthBarComponent->GetUserWidgetObject()))
 	{
 		UHealthComponent *Health = GetHealthComponent();
@@ -44,6 +46,11 @@ void ABaseEnemy::BeginPlay()
 	GetWorldTimerManager().SetTimer(ChaseTimerHandle, this, &ABaseEnemy::ChaseTarget, ChaseInterval, true);
 
 	LastAttackTime = -AttackCooldown;
+}
+
+void ABaseEnemy::HandleDamaged_Implementation(float DamageAmount)
+{
+	UE_LOG(LogTemp, Log, TEXT("%s took %.1f damage"), *GetName(), DamageAmount);
 }
 
 void ABaseEnemy::HandleDeath()

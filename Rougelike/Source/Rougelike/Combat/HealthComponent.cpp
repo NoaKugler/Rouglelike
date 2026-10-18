@@ -37,6 +37,11 @@ float UHealthComponent::GetMaxHealth() const
 
 void UHealthComponent::HandleHealthAttributeChanged(const FOnAttributeChangeData &Data)
 {
+    if (Data.Attribute == UCoreAttributeSet::GetHealthAttribute() && Data.NewValue < Data.OldValue)
+    {
+        OnDamaged.Broadcast(Data.OldValue - Data.NewValue);
+    }
+
     // Read both getters instead of Data.NewValue: this handler also fires for MaxHealth
     const float CurrentHealth = GetCurrentHealth();
     OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());

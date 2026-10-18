@@ -20,6 +20,10 @@ protected:
 
 	virtual void HandleDeath() override;
 
+	/** Bound to HealthComponent->OnDamaged. Blueprint children can override to add hit feedback. */
+	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
+	void HandleDamaged(float DamageAmount);
+
 	/** Applied to the target on each hit. Its magnitude comes from this enemy's Damage attribute. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
 	TSubclassOf<UGameplayEffect> AttackDamageEffect;
