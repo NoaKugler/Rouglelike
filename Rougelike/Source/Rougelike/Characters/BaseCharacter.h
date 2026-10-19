@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayAbilitySystem/RougelikeAbilitySystemComponent.h"
+#include "GameplayAbilitySystem/GrantSet.h"
 #include "BaseCharacter.generated.h"
 
 class UHealthComponent;
@@ -42,17 +43,22 @@ public:
     TObjectPtr<UOffenseAttributeSet> OffenseAttributeSet;
 
 protected:
+    /** Instant: sets the starting stats once. It can't be revoked, so it isn't part of the grant set. */
     UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
-    TArray<TSubclassOf<UGameplayEffect>> StartupEffects;
+    TSubclassOf<UGameplayEffect> InitAttributesEffect;
 
+    /** What this character has from the start, given once on the first possession. The character is its source. */
     UPROPERTY(EditDefaultsOnly, Category = "AbilitySystem")
-    TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
+    FGrantSet StartingGrants;
 
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UHealthComponent> HealthComponent;
 
     bool bAbilitySystemReady = false;
+
+    // Never revoked today, but whoever gives keeps the receipt
+    FGrantedHandles StartingGrantHandles;
 
 public:
     /** Fires once, after the first possession gave the starting effects and abilities */
@@ -65,6 +71,14 @@ public:
 
     virtual UAbilitySystemComponent *GetAbilitySystemComponent() const override;
 
+    // TEMPORARY (F1 test): proves the receipt removes exactly what it gave. Delete after testing.
+    UFUNCTION(Exec)
+    void DebugRevokeStartingGrants();
+
+    UFUNCTION(Exec)
+    void DebugGiveStartingGrants();
+
+    // Old weapon path: only WeaponsManagerComponent uses these two. Deleted in F4, when weapons go through FGrantSet.
     UFUNCTION(BlueprintCallable, Category = "AbilitySystem")
     TArray<FGameplayAbilitySpecHandle> GrantAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant);
 
@@ -78,7 +92,7 @@ protected:
 
     void InitializeAbilitySystem();
 
-    void ApplyStartupEffects();
+    void ApplyInitAttributes();
 
     /** Bound to HealthComponent->OnDeath. Subclasses extend it and call Super. */
     UFUNCTION()

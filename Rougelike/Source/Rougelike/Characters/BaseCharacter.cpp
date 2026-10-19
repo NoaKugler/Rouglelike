@@ -4,6 +4,8 @@
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
 #include "GameplayAbilitySystem/Attributes/OffenseAttributeSet.h"
 #include "GameplayAbilitySystem/RougelikeAbilitySystemComponent.h"
+#include "GameplayEffect.h"
+#include "Rougelike.h"
 
 ABaseCharacter::ABaseCharacter()
 {
@@ -52,32 +54,35 @@ void ABaseCharacter::InitializeAbilitySystem()
         return;
     }
 
-    ApplyStartupEffects();
-    GrantAbilities(DefaultAbilities);
+    // Base stats first, then everything that modifies them while it is active
+    ApplyInitAttributes();
+    StartingGrantHandles = StartingGrants.Give(AbilitySystemComponent, this);
 
     bAbilitySystemReady = true;
     OnAbilitySystemReady.Broadcast();
 }
 
-void ABaseCharacter::ApplyStartupEffects()
+void ABaseCharacter::ApplyInitAttributes()
 {
-    for (const TSubclassOf<UGameplayEffect> &EffectClass : StartupEffects)
+    if (!InitAttributesEffect)
     {
-        // An empty slot in the array is easy to leave behind in the editor
-        if (!EffectClass)
-        {
-            continue;
-        }
+        return;
+    }
 
-        // One context per effect, so specs never share (and mutate) the same context object
-        FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
-        Context.AddSourceObject(this);
+    // A lasting effect here would never be removed: nothing keeps a receipt for it
+    if (InitAttributesEffect.GetDefaultObject()->DurationPolicy != EGameplayEffectDurationType::Instant)
+    {
+        UE_LOG(LogRougelike, Warning, TEXT("%s: InitAttributesEffect %s must be Instant"), *GetName(), *InitAttributesEffect->GetName());
+        return;
+    }
 
-        const FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, 1.f, Context);
-        if (Spec.IsValid())
-        {
-            AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-        }
+    FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+    Context.AddSourceObject(this);
+
+    const FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(InitAttributesEffect, 1.f, Context);
+    if (Spec.IsValid())
+    {
+        AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
     }
 }
 
@@ -131,4 +136,21 @@ void ABaseCharacter::HandleDeath()
 {
     // Every character stops moving when it dies; subclasses add what death means for them
     GetCharacterMovement()->DisableMovement();
+}
+
+void ABaseCharacter::DebugRevokeStartingGrants()
+{
+    StartingGrantHandles.Revoke();
+}
+
+void ABaseCharacter::DebugGiveStartingGrants()
+{
+    // Giving over a live receipt would orphan it: its grants could never be revoked again
+    if (!StartingGrantHandles.IsEmpty())
+    {
+        UE_LOG(LogRougelike, Warning, TEXT("%s: starting grants are already given"), *GetName());
+        return;
+    }
+
+    StartingGrantHandles = StartingGrants.Give(AbilitySystemComponent, this);
 }
