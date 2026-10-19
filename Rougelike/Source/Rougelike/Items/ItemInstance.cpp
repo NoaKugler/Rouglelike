@@ -4,7 +4,9 @@
 #include "Items/ItemDefinition.h"
 #include "Items/Fragments/ItemFragment.h"
 
-void UItemInstance::Initialize(TSubclassOf<UItemDefinition> InItemDefinition)
+void UItemInstance::Initialize(
+    TSubclassOf<UItemDefinition> InItemDefinition,
+    const TMap<FGameplayTag, float> &InItemStats)
 {
     if (!InItemDefinition)
     {
@@ -18,6 +20,11 @@ void UItemInstance::Initialize(TSubclassOf<UItemDefinition> InItemDefinition)
     for (const TObjectPtr<UItemFragment> &Fragment : ItemCDO->ItemFragments)
     {
         Fragment->OnInstanceCreated(this);
+    }
+
+    if (!InItemStats.IsEmpty())
+    {
+        ItemStats = InItemStats;
     }
 }
 
