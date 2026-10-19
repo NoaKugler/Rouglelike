@@ -3,7 +3,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
 #include "GameplayAbilitySystem/Attributes/OffenseAttributeSet.h"
-#include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayAbilitySystem/RougelikeAbilitySystemComponent.h"
 
 ABaseCharacter::ABaseCharacter()
@@ -105,7 +104,6 @@ TArray<FGameplayAbilitySpecHandle> ABaseCharacter::GrantAbilities(TArray<TSubcla
         }
     }
 
-    SendAbilitiesChangedEvent();
     return GrantedHandles;
 }
 
@@ -120,18 +118,6 @@ void ABaseCharacter::RemoveAbilities(TArray<FGameplayAbilitySpecHandle> AbilityH
     {
         AbilitySystemComponent->ClearAbility(AbilityHandle);
     }
-
-    SendAbilitiesChangedEvent();
-}
-
-void ABaseCharacter::SendAbilitiesChangedEvent()
-{
-    FGameplayEventData EventData;
-    EventData.EventTag = FGameplayTag::RequestGameplayTag(FName("Event.Abilities.Changed"));
-    EventData.Instigator = this;
-    EventData.Target = this;
-
-    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this, EventData.EventTag, EventData);
 }
 
 FVector ABaseCharacter::GetAimLocation() const
