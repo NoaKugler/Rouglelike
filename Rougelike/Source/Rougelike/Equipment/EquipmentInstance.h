@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "EquipmentInstance.generated.h"
 
+class ACharacter;
 class UItemInstance;
 class UEquipmentDefinition;
 /**
@@ -27,7 +28,7 @@ public:
 	TObjectPtr<AActor> EquipmentActor;
 
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void Initialize(UItemInstance *InSourceItemInstance);
+	void Initialize(UItemInstance *InSourceItemInstance, ACharacter *Character);
 
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	void HandleEquipItem(ACharacter *Character);

@@ -7,11 +7,11 @@
 #include "GameFramework/Character.h"
 #include "EquipmentInstance.h"
 
-void UEquipmentInstance::Initialize(UItemInstance *InSourceItemInstance)
+void UEquipmentInstance::Initialize(UItemInstance *InSourceItemInstance, ACharacter *Character)
 {
-    if (!InSourceItemInstance)
+    if (!InSourceItemInstance || !Character)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UEquipmentInstance::Initialize called with null SourceItemInstance"));
+        UE_LOG(LogTemp, Warning, TEXT("UEquipmentInstance::Initialize called with null SourceItemInstance or Character"));
         return;
     }
 
@@ -23,6 +23,8 @@ void UEquipmentInstance::Initialize(UItemInstance *InSourceItemInstance)
     {
         EquipmentDefinition = EquippableFragment->EquipmentDefinition;
     }
+
+    HandleEquipItem(Character);
 }
 
 void UEquipmentInstance::HandleEquipItem(ACharacter *Character)

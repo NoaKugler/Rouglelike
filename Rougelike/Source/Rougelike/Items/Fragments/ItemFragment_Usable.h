@@ -7,6 +7,7 @@
 #include "ItemFragment_Usable.generated.h"
 
 class UItemAction;
+class UItemInstance;
 
 /**
  *
@@ -24,5 +25,5 @@ public:
 	TArray<TObjectPtr<UItemAction>> OnUseActions;
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	bool Use(AActor *ItemOwner);
+	bool Use(AActor *ItemOwner, UItemInstance *ItemInstance);
 };
