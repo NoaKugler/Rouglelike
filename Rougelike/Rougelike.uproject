@@ -76,6 +76,14 @@
 		{
 			"Name": "ConfigSettingsToolset",
 			"Enabled": true
+		},
+		{
+			"Name": "MVVMToolset",
+			"Enabled": true
+		},
+		{
+			"Name": "SequencerAnimMixerToolset",
+			"Enabled": true
 		}
 	]
 }
