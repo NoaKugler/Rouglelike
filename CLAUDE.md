@@ -55,6 +55,7 @@ The user wants to **learn by building**. Claude guides, plans, explains and revi
 - Builds are defined by stacking items and abilities with synergies.
 - Generic roguelike systems (enemies, weapons, loot, inventory) stay modular and reusable.
 - Scope intentionally small at first: one arena, one weapon, one enemy type, a handful of upgrades. Prove the systems, then widen.
+- All of that can change, even the camera perspective its all just the initial idea, the only thing fixed is that its a rougelike in 3d
 
 ## Decisions
 - **2026-10-16, vision:** ARPG × roguelike with a top-down camera, in this same project (no new project).
