@@ -8,6 +8,15 @@
 
 class UItemFragment;
 
+UENUM(BlueprintType)
+enum class EItemRarity : uint8
+{
+	None,
+	Common,
+	Rare,
+	Legendary
+};
+
 /**
  *
  */
@@ -25,6 +34,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	TObjectPtr<UTexture2D> ItemIcon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	EItemRarity ItemRarity = EItemRarity::None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Item")
 	TArray<TObjectPtr<UItemFragment>> ItemFragments;
