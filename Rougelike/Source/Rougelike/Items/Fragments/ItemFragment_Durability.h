@@ -23,4 +23,7 @@ public:
 	// Takes the instance because the fragment is shared definition data; the durability itself lives on the instance.
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void DecrementDurability(UItemInstance *ItemInstance) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Item")
+	bool HasDurabilityLeft(UItemInstance *ItemInstance) const;
 };
