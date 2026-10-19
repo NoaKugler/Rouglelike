@@ -3,6 +3,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
+#include "GameplayAbilitySystem/RougelikeAbilitySystemComponent.h"
 
 UHealthComponent::UHealthComponent()
 {
@@ -23,6 +24,12 @@ void UHealthComponent::InitializeComponent()
 
     AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCoreAttributeSet::GetHealthAttribute()).AddUObject(this, &UHealthComponent::HandleHealthAttributeChanged);
     AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCoreAttributeSet::GetMaxHealthAttribute()).AddUObject(this, &UHealthComponent::HandleHealthAttributeChanged);
+
+    // Damage comes from the attribute set's report, not from Health going down: a lowered MaxHealth also lowers Health
+    if (URougelikeAbilitySystemComponent *RougelikeASC = Cast<URougelikeAbilitySystemComponent>(AbilitySystemComponent))
+    {
+        RougelikeASC->OnDamageReceived.AddUObject(this, &UHealthComponent::HandleDamageReceived);
+    }
 }
 
 float UHealthComponent::GetCurrentHealth() const
@@ -37,11 +44,6 @@ float UHealthComponent::GetMaxHealth() const
 
 void UHealthComponent::HandleHealthAttributeChanged(const FOnAttributeChangeData &Data)
 {
-    if (Data.Attribute == UCoreAttributeSet::GetHealthAttribute() && Data.NewValue < Data.OldValue)
-    {
-        OnDamaged.Broadcast(Data.OldValue - Data.NewValue);
-    }
-
     // Read both getters instead of Data.NewValue: this handler also fires for MaxHealth
     const float CurrentHealth = GetCurrentHealth();
     OnHealthChanged.Broadcast(CurrentHealth, GetMaxHealth());
@@ -51,4 +53,9 @@ void UHealthComponent::HandleHealthAttributeChanged(const FOnAttributeChangeData
         bIsDead = true;
         OnDeath.Broadcast();
     }
+}
+
+void UHealthComponent::HandleDamageReceived(const FDamageReport &Report)
+{
+    OnDamaged.Broadcast(Report);
 }

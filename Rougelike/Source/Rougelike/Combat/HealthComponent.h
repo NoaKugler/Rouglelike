@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameplayAbilitySystem/Effects/DamageReport.h"
 #include "HealthComponent.generated.h"
 
 class UAbilitySystemComponent;
@@ -9,7 +10,7 @@ struct FOnAttributeChangeData;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, CurrentHealth, float, MaxHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamaged, float, DamageAmount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamaged, const FDamageReport &, Report);
 
 UCLASS(ClassGroup = (Combat), meta = (BlueprintSpawnableComponent))
 class ROUGELIKE_API UHealthComponent : public UActorComponent
@@ -32,7 +33,7 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Health")
     FOnHealthChanged OnHealthChanged;
 
-    /** Broadcast when Health drops, with the amount actually lost (after clamping) */
+    /** Broadcast once per damaging hit. Health lost any other way (a lowered max, a cost) doesn't count. */
     UPROPERTY(BlueprintAssignable, Category = "Health")
     FOnDamaged OnDamaged;
 
@@ -46,6 +47,9 @@ protected:
 private:
     // Bound to both Health and MaxHealth. Native delegate, so no UFUNCTION.
     void HandleHealthAttributeChanged(const FOnAttributeChangeData &Data);
+
+    // Bound to the ASC's native OnDamageReceived
+    void HandleDamageReceived(const FDamageReport &Report);
 
     UPROPERTY()
     TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;

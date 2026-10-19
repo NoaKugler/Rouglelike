@@ -43,11 +43,6 @@ public:
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UCoreAttributeSet, MaxMana)
 
-	// Old pipeline: GE_Damage reads this as the attacker's damage. Remove once no asset uses it.
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes", ReplicatedUsing = OnRep_Damage)
-	FGameplayAttributeData Damage;
-	ATTRIBUTE_ACCESSORS(UCoreAttributeSet, Damage)
-
 	// Meta attribute: UDamageExecution writes the final damage here, PostGameplayEffectExecute turns it into Health loss.
 	// Only holds a value during one execution, so it isn't replicated.
 	UPROPERTY(BlueprintReadOnly, Category = "Attributes")
@@ -68,12 +63,12 @@ public:
 	UFUNCTION()
 	virtual void OnRep_MaxMana(const FGameplayAttributeData &OldMaxMana) { GAMEPLAYATTRIBUTE_REPNOTIFY(UCoreAttributeSet, MaxMana, OldMaxMana); };
 
-	UFUNCTION()
-	virtual void OnRep_Damage(const FGameplayAttributeData &OldDamage) { GAMEPLAYATTRIBUTE_REPNOTIFY(UCoreAttributeSet, Damage, OldDamage); };
-
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 
 	virtual void PreAttributeChange(const FGameplayAttribute &Attribute, float &NewValue) override;
+	/** Health and Mana follow their max, whatever changed it: a raise adds the same amount, a drop only clamps */
+	virtual void PostAttributeChange(const FGameplayAttribute &Attribute, float OldValue, float NewValue) override;
+
 	virtual void PreAttributeBaseChange(const FGameplayAttribute &Attribute, float &NewValue) const override;
 
 	/** Where all damage lands: converts IncomingDamage into Health loss */
@@ -82,4 +77,10 @@ public:
 private:
 	// Shared by both Pre hooks so base and current value always obey the same limits
 	void ClampAttribute(const FGameplayAttribute &Attribute, float &NewValue) const;
+
+	// Moves Health or Mana after its max went from OldMax to NewMax
+	void FollowMaxChange(const FGameplayAttribute &CurrentAttribute, float OldMax, float NewMax);
+
+	// Tells the victim's ASC what one damaging hit did, once Health has changed
+	void SendDamageReport(const FGameplayEffectModCallbackData &Data, float Damage, float HealthLost) const;
 };

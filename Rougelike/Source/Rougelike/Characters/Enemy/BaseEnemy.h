@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Characters/BaseCharacter.h"
 #include "GameplayAbilitySystem/Effects/DamageEffect.h"
+#include "GameplayAbilitySystem/Effects/DamageReport.h"
 #include "BaseEnemy.generated.h"
 
 class UWidgetComponent;
@@ -22,7 +23,7 @@ protected:
 
 	/** Bound to HealthComponent->OnDamaged. Blueprint children can override to add hit feedback. */
 	UFUNCTION(BlueprintNativeEvent, Category = "Combat")
-	void HandleDamaged(float DamageAmount);
+	void HandleDamaged(const FDamageReport &Report);
 
 	/** Applied to the target on each hit. Its base damage is scaled by this enemy's offense stats. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")

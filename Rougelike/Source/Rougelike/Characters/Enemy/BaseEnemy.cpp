@@ -50,9 +50,9 @@ void ABaseEnemy::BeginPlay()
 	LastAttackTime = -AttackCooldown;
 }
 
-void ABaseEnemy::HandleDamaged_Implementation(float DamageAmount)
+void ABaseEnemy::HandleDamaged_Implementation(const FDamageReport &Report)
 {
-	UE_LOG(LogRougelike, Log, TEXT("%s took %.1f damage"), *GetName(), DamageAmount);
+	UE_LOG(LogRougelike, Log, TEXT("%s took %.1f damage from %s"), *GetName(), Report.HealthLost, *GetNameSafe(Report.Instigator));
 }
 
 void ABaseEnemy::HandleDeath()

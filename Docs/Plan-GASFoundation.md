@@ -78,7 +78,7 @@ This amends the 2026-10-18 decision; record it in CLAUDE.md when F6 is done.
 | Equipment slots and item types | Generic: slot tags in data, nothing hard-coded. |
 | Swapping or unequipping a weapon mid-attack | Its running ability ends immediately. |
 | Dropping an equipped item | Unequip first, then drop. |
-| MaxHealth / MaxMana change | Keep the **percentage**: when the max changes, Health/Mana scale to the same fraction (30/100 → 45/150). Clamping is still kept as a safety net. |
+| MaxHealth / MaxMana change (changed 2026-10-20) | **Raise adds, lower clamps.** When the max rises, Health/Mana rise by the same amount (30/100 → 80/150). When it drops, they only clamp to the new max (80/150 → 80/100, 150/150 → 100/100). A dead character (Health 0) gains nothing. Side effect: unequipping and re-equipping a +Max item gives back Health each cycle. |
 | `ItemAction_Equip` | Stays as a Blueprint wrapper around the C++ equipment component. |
 | Damage formula | (Base + Bonus) × (1 + Increased) for now. `FlatDamage` is renamed to `BonusDamage`. |
 | Testing items | Placed in the level by hand. No loot or RNG system yet. Rolls go through one small helper function, so seeding can be added later. |
@@ -99,7 +99,7 @@ This amends the 2026-10-18 decision; record it in CLAUDE.md when F6 is done.
 **Adapt:**
 - `ABaseCharacter`: init the ASC once, ready event, starting grant set, aim point fix
 - `URougelikeAbilitySystemComponent`
-- `UCoreAttributeSet`: re-scale on max change, damage report
+- `UCoreAttributeSet`: follow max changes (raise adds, lower clamps), damage report
 - `UOffenseAttributeSet`: `IncreasedDamage`
 - `URougelikeGameplayAbility`: `InstancedPerActor` default, display data, source-item helpers
 - `UItemInstance`, `UItemFragment_Equippable`
@@ -144,7 +144,7 @@ Sub-steps:
 - **ASC "abilities changed" event.** Broadcast from `OnGiveAbility`/`OnRemoveAbility`, coalesced to the next tick, because removal fires before the spec leaves the list. The ability bar listens to it instead of `Event.Abilities.Changed`.
 - **`UCoreAttributeSet`.**
   - Delete the legacy `Damage` attribute.
-  - When MaxHealth/MaxMana change, scale Health/Mana to keep their percentage.
+  - When MaxHealth/MaxMana rise, add the same amount to Health/Mana. When they drop, clamp Health/Mana to the new max.
   - Build one damage report in the `IncomingDamage` branch and send it to the victim ASC's delegate. `UHealthComponent::OnDamaged` uses it, instead of guessing damage from Health going down.
 
 **Teaches:**
@@ -153,7 +153,7 @@ Sub-steps:
 
 **Verify:**
 - Weapons still work through the old path, with the same damage numbers.
-- Apply a +50 MaxHealth test GE at 30/100: Health becomes 45/150, and removing it returns 30/100. No damage number appears.
+- Apply a +50 MaxHealth test GE at 100/200: Health becomes 150/250, and removing it gives 150/200. At full health it goes 200/200 → 250/250 → 200/200. No damage event fires for any of it.
 - The ability bar refreshes once per weapon swap.
 - No `RequestGameplayTag` left in Source.
 
@@ -294,7 +294,7 @@ Each item plugs into the grant door rather than replacing it.
 - single player only
 - the grant door rule (one way in and out; the source is the SourceObject)
 - the damage formula
-- the max Health/Mana percentage rule
+- the max Health/Mana rule (raise adds, lower clamps)
 
 **Drift to fix:**
 - Content root is `Content/Rougelike`, not `_Game`, and the map path changed with it.
