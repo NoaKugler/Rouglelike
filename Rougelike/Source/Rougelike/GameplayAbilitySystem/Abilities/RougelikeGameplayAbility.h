@@ -7,6 +7,8 @@
 #include "GameplayAbilitySystem/Effects/DamageEffect.h"
 #include "RougelikeGameplayAbility.generated.h"
 
+class UTexture2D;
+
 /**
  *
  */
@@ -16,7 +18,16 @@ class ROUGELIKE_API URougelikeGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	URougelikeGameplayAbility();
+
+	/** Shown on the ability bar. The bar falls back to the class name when this is empty. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	FText AbilityName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UTexture2D> AbilityIcon;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	bool bShouldShowInAbilityBar = true;
 
 	/** Spec of DamageEffect.Effect with its base damage filled in. The attacker's stats scale it when it hits. */

@@ -8,6 +8,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Combat/HealthComponent.h"
+#include "Rougelike.h"
 #include "GameplayAbilitySystem/RougelikeGameplayTags.h"
 
 // Sets default values
@@ -51,7 +52,7 @@ void ABaseEnemy::BeginPlay()
 
 void ABaseEnemy::HandleDamaged_Implementation(float DamageAmount)
 {
-	UE_LOG(LogTemp, Log, TEXT("%s took %.1f damage"), *GetName(), DamageAmount);
+	UE_LOG(LogRougelike, Log, TEXT("%s took %.1f damage"), *GetName(), DamageAmount);
 }
 
 void ABaseEnemy::HandleDeath()

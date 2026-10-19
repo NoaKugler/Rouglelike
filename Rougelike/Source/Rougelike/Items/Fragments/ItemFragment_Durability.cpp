@@ -2,39 +2,30 @@
 
 #include "Items/Fragments/ItemFragment_Durability.h"
 #include "Items/ItemInstance.h"
-#include "GameplayTagContainer.h"
+#include "Items/ItemTags.h"
 
 void UItemFragment_Durability::OnInstanceCreated(UItemInstance *ItemInstance)
 {
     Super::OnInstanceCreated(ItemInstance);
 
-    static const FGameplayTag DurabilityTag = FGameplayTag::RequestGameplayTag(FName("Item.Stat.Durability"), false);
-    if (!ItemInstance || !DurabilityTag.IsValid())
-    {
+    if (!ItemInstance)
         return;
-    }
 
-    ItemInstance->SetStatValue(DurabilityTag, MaxUses);
+    ItemInstance->SetStatValue(ItemTags::Stat_Durability, MaxUses);
 }
 
 void UItemFragment_Durability::DecrementDurability(UItemInstance *ItemInstance) const
 {
-    static const FGameplayTag DurabilityTag = FGameplayTag::RequestGameplayTag(FName("Item.Stat.Durability"), false);
-    if (!ItemInstance || !DurabilityTag.IsValid())
-    {
+    if (!ItemInstance)
         return;
-    }
 
-    ItemInstance->SetStatValue(DurabilityTag, FMath::Max(0.f, ItemInstance->GetStatValue(DurabilityTag) - 1.f));
+    ItemInstance->SetStatValue(ItemTags::Stat_Durability, FMath::Max(0.f, ItemInstance->GetStatValue(ItemTags::Stat_Durability) - 1.f));
 }
 
 bool UItemFragment_Durability::HasDurabilityLeft(UItemInstance *ItemInstance) const
 {
-    static const FGameplayTag DurabilityTag = FGameplayTag::RequestGameplayTag(FName("Item.Stat.Durability"), false);
-    if (!ItemInstance || !DurabilityTag.IsValid())
-    {
+    if (!ItemInstance)
         return false;
-    }
 
-    return ItemInstance->GetStatValue(DurabilityTag) > 0.f;
+    return ItemInstance->GetStatValue(ItemTags::Stat_Durability) > 0.f;
 }

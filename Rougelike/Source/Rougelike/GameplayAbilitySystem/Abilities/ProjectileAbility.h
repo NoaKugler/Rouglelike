@@ -18,8 +18,6 @@ class ROUGELIKE_API UProjectileAbility : public URougelikeGameplayAbility
     GENERATED_BODY()
 
 public:
-    UProjectileAbility();
-
     virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo *ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData *TriggerEventData) override;
 
 protected:

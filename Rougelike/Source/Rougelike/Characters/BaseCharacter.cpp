@@ -22,7 +22,6 @@ ABaseCharacter::ABaseCharacter()
     // Ability System Component
     AbilitySystemComponent = CreateDefaultSubobject<URougelikeAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
     AbilitySystemComponent->SetIsReplicated(true);
-    AbilitySystemComponent->SetReplicationMode(AbilityReplicationMode);
 
     CoreAttributeSet = CreateDefaultSubobject<UCoreAttributeSet>(TEXT("CoreAttributeSet"));
 
@@ -40,13 +39,25 @@ void ABaseCharacter::BeginPlay()
 void ABaseCharacter::PossessedBy(AController *NewController)
 {
     Super::PossessedBy(NewController);
+    InitializeAbilitySystem();
+}
 
-    if (AbilitySystemComponent)
+void ABaseCharacter::InitializeAbilitySystem()
+{
+    // Every possession: the actor info stores the controller, so a new controller has to be picked up
+    AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+    // Only the first time: a second possession must not stack the starting effects or give the abilities twice
+    if (bAbilitySystemReady)
     {
-        AbilitySystemComponent->InitAbilityActorInfo(this, this);
-        ApplyStartupEffects();
-        GrantAbilities(DefaultAbilities);
+        return;
     }
+
+    ApplyStartupEffects();
+    GrantAbilities(DefaultAbilities);
+
+    bAbilitySystemReady = true;
+    OnAbilitySystemReady.Broadcast();
 }
 
 void ABaseCharacter::ApplyStartupEffects()
@@ -68,16 +79,6 @@ void ABaseCharacter::ApplyStartupEffects()
         {
             AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
         }
-    }
-}
-
-void ABaseCharacter::OnRep_PlayerState()
-{
-    Super::OnRep_PlayerState();
-
-    if (AbilitySystemComponent)
-    {
-        AbilitySystemComponent->InitAbilityActorInfo(this, this);
     }
 }
 
@@ -135,7 +136,9 @@ void ABaseCharacter::SendAbilitiesChangedEvent()
 
 FVector ABaseCharacter::GetAimLocation() const
 {
-    return FVector();
+    // Straight ahead at the character's own height, far enough that a direction computed from it is stable
+    constexpr float AimDistance = 1000.f;
+    return GetActorLocation() + GetActorForwardVector() * AimDistance;
 }
 
 void ABaseCharacter::HandleDeath()

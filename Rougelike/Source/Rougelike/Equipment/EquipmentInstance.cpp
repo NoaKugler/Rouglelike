@@ -5,13 +5,13 @@
 #include "Items/Fragments/ItemFragment_Equippable.h"
 #include "Items/ItemInstance.h"
 #include "GameFramework/Character.h"
-#include "EquipmentInstance.h"
+#include "Rougelike.h"
 
 void UEquipmentInstance::Initialize(UItemInstance *InSourceItemInstance, ACharacter *Character)
 {
     if (!InSourceItemInstance || !Character)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UEquipmentInstance::Initialize called with null SourceItemInstance or Character"));
+        UE_LOG(LogRougelike, Warning, TEXT("UEquipmentInstance::Initialize called with null SourceItemInstance or Character"));
         return;
     }
 
@@ -32,14 +32,14 @@ void UEquipmentInstance::HandleEquipItem(ACharacter *Character)
     UEquipmentDefinition *DefinitionCDO = EquipmentDefinition.GetDefaultObject();
     if (!DefinitionCDO)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UEquipmentInstance::HandleEquipItem called with null EquipmentDefinition"));
+        UE_LOG(LogRougelike, Warning, TEXT("UEquipmentInstance::HandleEquipItem called with null EquipmentDefinition"));
         return;
     }
 
     EquipmentActor = GetWorld()->SpawnActor(DefinitionCDO->EquipmentActorClass);
     if (!EquipmentActor)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UEquipmentInstance::HandleEquipItem failed to spawn EquipmentActor"));
+        UE_LOG(LogRougelike, Warning, TEXT("UEquipmentInstance::HandleEquipItem failed to spawn EquipmentActor"));
         return;
     }
 

@@ -1,9 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GameplayAbilitySystem/Abilities/RougelikeGameplayAbility.h"
 #include "GameplayAbilitySystem/RougelikeGameplayTags.h"
 #include "GameplayEffect.h"
+
+URougelikeGameplayAbility::URougelikeGameplayAbility()
+{
+	// 5.8 defaults to InstancedPerExecution: a new ability object for every activation.
+	// One instance per actor is cheaper, but its variables survive between activations, so reset them on activate.
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+}
 
 FGameplayEffectSpecHandle URougelikeGameplayAbility::MakeDamageEffectSpec(const FDamageEffect &DamageEffect) const
 {

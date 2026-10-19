@@ -2,6 +2,7 @@
 
 #include "Items/ItemInstance.h"
 #include "Items/ItemDefinition.h"
+#include "Rougelike.h"
 #include "Items/Fragments/ItemFragment.h"
 
 void UItemInstance::Initialize(
@@ -10,7 +11,7 @@ void UItemInstance::Initialize(
 {
     if (!InItemDefinition)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UItemInstance::Initialize called with null ItemDefinition"));
+        UE_LOG(LogRougelike, Warning, TEXT("UItemInstance::Initialize called with null ItemDefinition"));
         return;
     }
 
@@ -19,13 +20,15 @@ void UItemInstance::Initialize(
     UItemDefinition *ItemCDO = ItemDefinition.GetDefaultObject();
     for (const TObjectPtr<UItemFragment> &Fragment : ItemCDO->ItemFragments)
     {
-        Fragment->OnInstanceCreated(this);
+        // An empty entry in a definition's fragment list is easy to leave behind in the editor
+        if (Fragment)
+        {
+            Fragment->OnInstanceCreated(this);
+        }
     }
 
-    if (!InItemStats.IsEmpty())
-    {
-        ItemStats = InItemStats;
-    }
+    // Per key: passed-in values (e.g. the uses left on a dropped item) win, and fragment defaults for other keys stay
+    ItemStats.Append(InItemStats);
 }
 
 const UItemFragment *UItemInstance::FindFragmentByClass(const TSubclassOf<UItemFragment> FragmentClass)

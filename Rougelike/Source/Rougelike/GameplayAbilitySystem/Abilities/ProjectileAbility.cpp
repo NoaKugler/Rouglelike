@@ -3,12 +3,6 @@
 #include "Weapons/Projectile.h"
 #include "Engine/World.h"
 
-UProjectileAbility::UProjectileAbility()
-{
-    // 5.8 defaults to InstancedPerExecution, which creates a new ability object for every shot
-    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-}
-
 void UProjectileAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo *ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData *TriggerEventData)
 {
     // Pays the cost and starts the cooldown. Fails if either can't be paid.
