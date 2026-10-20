@@ -71,13 +71,6 @@ public:
 
     virtual UAbilitySystemComponent *GetAbilitySystemComponent() const override;
 
-    // Old weapon path: only WeaponsManagerComponent uses these two. Deleted in F4, when weapons go through FGrantSet.
-    UFUNCTION(BlueprintCallable, Category = "AbilitySystem")
-    TArray<FGameplayAbilitySpecHandle> GrantAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant);
-
-    UFUNCTION(BlueprintCallable, Category = "AbilitySystem")
-    void RemoveAbilities(TArray<FGameplayAbilitySpecHandle> AbilityHandlesToRemove);
-
 protected:
     virtual void BeginPlay() override;
 

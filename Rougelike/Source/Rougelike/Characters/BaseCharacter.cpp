@@ -91,40 +91,6 @@ UAbilitySystemComponent *ABaseCharacter::GetAbilitySystemComponent() const
     return AbilitySystemComponent;
 }
 
-TArray<FGameplayAbilitySpecHandle> ABaseCharacter::GrantAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant)
-{
-    if (!AbilitySystemComponent)
-    {
-        return TArray<FGameplayAbilitySpecHandle>();
-    }
-
-    TArray<FGameplayAbilitySpecHandle> GrantedHandles;
-
-    for (TSubclassOf<UGameplayAbility> AbilityClass : AbilitiesToGrant)
-    {
-        if (AbilityClass)
-        {
-            GrantedHandles.Add(AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(
-                AbilityClass, 1, INDEX_NONE, this)));
-        }
-    }
-
-    return GrantedHandles;
-}
-
-void ABaseCharacter::RemoveAbilities(TArray<FGameplayAbilitySpecHandle> AbilityHandlesToRemove)
-{
-    if (!AbilitySystemComponent)
-    {
-        return;
-    }
-
-    for (const FGameplayAbilitySpecHandle &AbilityHandle : AbilityHandlesToRemove)
-    {
-        AbilitySystemComponent->ClearAbility(AbilityHandle);
-    }
-}
-
 FVector ABaseCharacter::GetAimLocation() const
 {
     // Straight ahead at the character's own height, far enough that a direction computed from it is stable

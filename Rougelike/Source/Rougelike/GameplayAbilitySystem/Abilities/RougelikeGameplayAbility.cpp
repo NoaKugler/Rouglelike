@@ -2,6 +2,9 @@
 
 #include "GameplayAbilitySystem/Abilities/RougelikeGameplayAbility.h"
 #include "GameplayAbilitySystem/RougelikeGameplayTags.h"
+#include "Items/ItemInstance.h"
+#include "Equipment/EquipmentComponent.h"
+#include "Equipment/EquipmentInstance.h"
 #include "GameplayEffect.h"
 
 URougelikeGameplayAbility::URougelikeGameplayAbility()
@@ -27,4 +30,18 @@ FGameplayEffectSpecHandle URougelikeGameplayAbility::MakeDamageEffectSpec(const 
 		Spec.Data->SetSetByCallerMagnitude(RougelikeGameplayTags::SetByCaller_Damage, DamageEffect.BaseDamage.GetValueAtLevel(Level));
 	}
 	return Spec;
+}
+
+UItemInstance *URougelikeGameplayAbility::GetSourceItem() const
+{
+	return Cast<UItemInstance>(GetCurrentSourceObject());
+}
+
+AActor *URougelikeGameplayAbility::GetSourceEquipmentActor() const
+{
+	// Asks the equipment rather than caching the actor: the record is the one place that knows what is equipped
+	const AActor *Avatar = GetAvatarActorFromActorInfo();
+	const UEquipmentComponent *Equipment = Avatar ? Avatar->FindComponentByClass<UEquipmentComponent>() : nullptr;
+	const UEquipmentInstance *Record = Equipment ? Equipment->FindEquipmentForItem(GetSourceItem()) : nullptr;
+	return Record ? Record->GetSpawnedActor() : nullptr;
 }

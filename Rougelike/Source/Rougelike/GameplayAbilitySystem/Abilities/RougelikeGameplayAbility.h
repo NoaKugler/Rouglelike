@@ -8,6 +8,8 @@
 #include "RougelikeGameplayAbility.generated.h"
 
 class UTexture2D;
+class UItemInstance;
+class AActor;
 
 /** How a granted ability reacts to its input tag */
 UENUM(BlueprintType)
@@ -48,4 +50,12 @@ public:
 	/** Spec of DamageEffect.Effect with its base damage filled in. The attacker's stats scale it when it hits. */
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	FGameplayEffectSpecHandle MakeDamageEffectSpec(const FDamageEffect &DamageEffect) const;
+
+	/** The item that granted this ability, or null when its source isn't an item (e.g. the character's starting kit) */
+	UFUNCTION(BlueprintPure, Category = "Source")
+	UItemInstance *GetSourceItem() const;
+
+	/** The actor the source item spawned while equipped (the weapon), or null */
+	UFUNCTION(BlueprintPure, Category = "Source")
+	AActor *GetSourceEquipmentActor() const;
 };

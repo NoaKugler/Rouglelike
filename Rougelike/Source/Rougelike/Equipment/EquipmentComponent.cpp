@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
+#include "AbilitySystemGlobals.h"
 #include "Rougelike.h"
 
 UEquipmentComponent::UEquipmentComponent()
@@ -53,6 +54,13 @@ UEquipmentInstance *UEquipmentComponent::EquipItem(UItemInstance *Item)
 	Equipment->Definition = Definition->GetClass();
 	Equipment->Slot = Slot;
 	SpawnEquipmentActor(*Equipment, *Definition);
+
+	// After the actor exists, so an ability that activates right away can find its weapon.
+	// The item is the source: its abilities can find it, and every hit they make carries it.
+	if (UAbilitySystemComponent *ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()))
+	{
+		Equipment->GrantedHandles = Definition->Grants.Give(ASC, Item);
+	}
 
 	Equipped.Add(Equipment);
 	OnEquipmentChanged.Broadcast(Slot, Equipment);
@@ -164,7 +172,8 @@ void UEquipmentComponent::SpawnEquipmentActor(UEquipmentInstance &Equipment, con
 
 void UEquipmentComponent::Remove(UEquipmentInstance &Equipment)
 {
-	// F4: revoke the item's grants here, before the actor goes, so a running weapon ability ends while its weapon still exists
+	// Grants first: a running swing ends while its weapon still exists, so its end logic can still reach it
+	Equipment.GrantedHandles.Revoke();
 
 	if (Equipment.SpawnedActor)
 	{

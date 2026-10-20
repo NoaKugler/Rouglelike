@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "GameplayTagContainer.h"
+#include "GameplayAbilitySystem/GrantSet.h"
 #include "EquipmentDefinition.generated.h"
 
 /**
@@ -27,4 +28,8 @@ public:
 	/** Fits any slot whose tag is this tag or a child of it: Equipment.Slot.Ring fits Ring.Left and Ring.Right */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment", meta = (Categories = "Equipment.Slot"))
 	FGameplayTag AllowedSlot;
+
+	/** Given while equipped, with the item instance as source: a weapon's attack ability, an item's passive effects */
+	UPROPERTY(EditDefaultsOnly, Category = "Equipment")
+	FGrantSet Grants;
 };

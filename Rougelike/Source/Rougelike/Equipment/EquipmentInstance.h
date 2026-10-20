@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "GameplayTagContainer.h"
+#include "GameplayAbilitySystem/GrantSet.h"
 #include "EquipmentInstance.generated.h"
 
 class AActor;
@@ -49,4 +50,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AActor> SpawnedActor;
+
+	// What this equip granted. Plain C++ (no UPROPERTY): it holds only handles and a weak pointer.
+	FGrantedHandles GrantedHandles;
 };
