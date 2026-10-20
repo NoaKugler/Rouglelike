@@ -4,7 +4,7 @@ Status: agreed 2026-10-19. Replaces the old split between the tutorial inventory
 Scope: a **foundation**, not a game. It supports abilities, stats and equippable items/weapons in a modular way, whatever direction the game takes. No game loop, procs, upgrade cards, loot or run state yet (see the [Todo](#todo-later-not-part-of-the-foundation) list).
 Single player only.
 
-> **What "foundation" means here.** The game's direction is still open, so this plan builds only the general systems everything else will sit on: granting and revoking abilities and effects, equippable items and weapons that use that path, an inventory that keeps real item instances, item stats as GEs, input that isn't tied to specific abilities, and native tags. It deliberately does **not** decide content or game design: no specific slots, item types, stat lists, status effects, procs, upgrade cards, loot or game loop. Those are added later on top of this foundation, if and when the game needs them, without rewriting it. Concrete numbers and formulas (like the damage formula) are placeholders and are expected to change.
+> **What "foundation" means here.** The game's direction is still open, so this plan builds only the general systems everything else will sit on: granting and revoking abilities and effects, equippable items and weapons that use that path, items whose whole state is plain data (definition + stats) that one factory turns into instances, item stats as GEs, input that isn't tied to specific abilities, and native tags. It deliberately does **not** decide content or game design: no specific slots, item types, stat lists, status effects, procs, upgrade cards, loot or game loop. Those are added later on top of this foundation, if and when the game needs them, without rewriting it. Concrete numbers and formulas (like the damage formula) are placeholders and are expected to change.
 
 ---
 
@@ -42,7 +42,8 @@ Later sources (upgrade cards, relics, enemy modifiers) use the same grant set an
 | `UEquipmentDefinition` | Blueprint class definition (keep, extend) | "What equipping does": actor class + socket, **grant set**, allowed slot tag. Several items can share one. | gains the grant set; `FWeaponConfig` is folded into it |
 | `UEquipmentInstance` | UObject (adapt) | Runtime record of one equipped item: the spawned actor and the item's **receipt** | today it only spawns and attaches |
 | `UItemDefinition` + fragments | Blueprint class definitions (keep) | Item identity plus composition. The Equippable fragment points to an equipment definition. | unchanged model; small fixes |
-| `UItemInstance` | UObject (adapt) | One copy of an item: rolled stats + mutable counters (durability). It is the SourceObject for everything the item grants. | stats map split into rolled stats vs counters |
+| `UItemInstance` | UObject (adapt) | The runtime form of one item while it is in an inventory: definition + one stats map holding **everything** (rolls and counters like durability). It is the SourceObject for everything the item grants. Rebuilt from data whenever the item enters an inventory. | holds nothing outside the stats map |
+| `FStackInfo` | USTRUCT (keep) | The data form of an item stack: definition, count, stats. Pickups (placed and dropped) hold it; later saves store it. | unchanged; becomes the canonical item data |
 | `UInventoryComponent` (+ inventory model) | C++ actor component (new) | Storage, stacking, the **single item factory**, pickup/drop/use. Dropping unequips first. | `BP_InventoryManagerComponent`, `BPFL_ItemUtils` |
 | `ItemAction_Equip` | BP item action (keep) | Thin wrapper that calls `UEquipmentComponent`, so equipping stays inside the fragment/action system | today it calls the BP manager |
 | Stat definitions | small data asset (new) | Maps each item stat tag to its archetype GE and its display name/format for tooltips | raw tag names in tooltips; debug `GE_FlatDamage`/`GE_DamageMultiplier` |
@@ -81,6 +82,7 @@ This amends the 2026-10-18 decision; record it in CLAUDE.md when F6 is done.
 | MaxHealth / MaxMana change (changed 2026-10-20) | **Raise adds, lower clamps.** When the max rises, Health/Mana rise by the same amount (30/100 → 80/150). When it drops, they only clamp to the new max (80/150 → 80/100, 150/150 → 100/100). A dead character (Health 0) gains nothing. Side effect: unequipping and re-equipping a +Max item gives back Health each cycle. |
 | `ItemAction_Equip` | Stays as a Blueprint wrapper around the C++ equipment component. |
 | Damage formula | (Base + Bonus) × (1 + Increased) for now. `FlatDamage` is renamed to `BonusDamage`. |
+| Item state (changed 2026-10-20) | **Data, not identity.** An item's whole state is its definition + stats map (`FStackInfo`). Dropping turns the item into data on a pickup; picking up rebuilds a new instance through the factory. Everything an item remembers must be a stat. This keeps drop/pickup on the same path saves will use. |
 | Testing items | Placed in the level by hand. No loot or RNG system yet. Rolls go through one small helper function, so seeding can be added later. |
 
 ## 7. What changes in the current code
@@ -89,6 +91,7 @@ This amends the 2026-10-18 decision; record it in CLAUDE.md when F6 is done.
 - `UDamageExecution` and the `IncomingDamage` meta attribute, and the `MakeDamageEffectSpec` ordering
 - `UProjectileAbility` and projectile `HitEffects`
 - the item definition / fragments / instance model
+- `FStackInfo` as the data form of items (pickups, drop, later saves)
 - the inventory stacking algorithm (ported to C++)
 - `ANState_HitScanWindow` events
 - `GE_Burn`
@@ -119,7 +122,6 @@ This amends the 2026-10-18 decision; record it in CLAUDE.md when F6 is done.
 - the legacy `Damage` attribute
 - `GrantAbilities` / `RemoveAbilities` / `SendAbilitiesChangedEvent`
 - `AbilityReplicationMode`
-- `FStackInfo`: dropped pickups carry the real item instance
 - `IA_ToggleEquip` and the 1/2 weapon keys
 - debug `GE_FlatDamage` / `GE_DamageMultiplier`: replaced by test items
 
@@ -162,7 +164,16 @@ Sub-steps:
 
 Sub-steps:
 - `FGrantSet` (abilities: class, level, input tag; effects: infinite GEs) with a give function that takes the ASC and a SourceObject and fills an `FGrantedHandles`.
-- `FGrantedHandles` with revoke.
+- `FGrantedHand
+### F2: Input tags
+**Goal:** keys activate abilities by tag, so any item can decide what a key does.
+
+Sub-steps:
+- An input config data asset maps each Input Action to an `InputTag.*`.
+- Grant sets put the input tag on the ability spec.
+- The ASC subclass gets pressed/released functions that activate the spec carrying that exact tag, mirroring the engine's own input-pressed handling.
+- An activation policy per ability: on press, or while held (hold to fire, limited by the cooldown).
+- Move Dash first. Attack moves in F4.les` with revoke.
 - `ABaseCharacter`:
   - Replace `StartupEffects`/`DefaultAbilities` with an instant init-attributes GE plus one starting `FGrantSet` (Dash, mana regen), given on "ability system ready".
   - `GE_ManaRegen` becomes always on, which removes the BP regen loop.
@@ -175,15 +186,6 @@ Sub-steps:
 - Gameplay Debugger abilities view shows GA_Dash once.
 - Effects view shows GE_ManaRegen active.
 
-### F2: Input tags
-**Goal:** keys activate abilities by tag, so any item can decide what a key does.
-
-Sub-steps:
-- An input config data asset maps each Input Action to an `InputTag.*`.
-- Grant sets put the input tag on the ability spec.
-- The ASC subclass gets pressed/released functions that activate the spec carrying that exact tag, mirroring the engine's own input-pressed handling.
-- An activation policy per ability: on press, or while held (hold to fire, limited by the cooldown).
-- Move Dash first. Attack moves in F4.
 
 **Teaches:** Enhanced Input bound in C++, dynamic spec tags.
 
@@ -230,25 +232,28 @@ Sub-steps:
 - The Reference Viewer finds nothing left for the deleted types.
 
 ### F5: C++ inventory
-**Goal:** one C++ inventory owns item lifetime, and items keep their identity through drop and pickup.
+**Goal:** one C++ inventory owns the items a character carries. Items travel as data (`FStackInfo`: definition, count, stats) and are rebuilt into instances by one factory, so nothing is lost on drop and pickup.
 
 Sub-steps:
-1. First write down what the BP inventory does for a fixed pickup sequence. That is your reference.
-2. Port the stacking algorithm into an inventory model behind `UInventoryComponent`. Add the **single item factory**: the only place instances are created, and the place a roll helper is called later.
+1. First write down what the BP inventory does for a fixed pickup sequence. That is your reference. (Recorded 2026-10-20: coin 429; crystal 10 + 6; 4 scrolls of 1 with durability 3; staff; sword. 9 stacks.)
+2. Port the stacking algorithm into `UInventoryComponent`. Add the **single item factory** (`UItemInstance::CreateItem`): the only place instances are created, and the place a roll helper is called later.
 3. Pickup, drop and use:
-   - Drop unequips first, then spawns a pickup carrying the **same item instance**.
-   - Placed pickups still hold a definition + count, and the factory creates the instance on pickup.
-   - Use keeps the durability counters.
+   - Pickups (placed and dropped) hold one `FStackInfo`. Picking up calls the inventory with that data; the factory builds the instances.
+   - Drop turns the stack into `FStackInfo` (definition, count, the instance's stats), unequips and removes it, then spawns a pickup with that data. The old instance is discarded.
+   - Use keeps the durability counters (they are stats, so they survive drop and pickup).
 4. `UItemAction::Execute` becomes a BlueprintNativeEvent. The apply-effect and use-ability actions pass the item as SourceObject.
 5. Widgets bind to the C++ component.
-6. Delete the BP inventory, `BPFL_ItemUtils` and `FStackInfo`.
+6. Delete the BP inventory and `BPFL_ItemUtils`. `FStackInfo` stays.
 
-**Teaches:** UObject ownership (Outer, strong UPROPERTY owners vs the weak SourceObject), porting Blueprint logic against a recorded reference.
+**Rule:** everything an item remembers is a stat in its stats map. `UItemInstance` holds nothing else, or a drop would silently lose it.
+
+**Teaches:** UObject ownership (Outer, strong UPROPERTY owners vs the weak SourceObject), data vs runtime objects (the data form is what moves and what saves store), porting Blueprint logic against a recorded reference.
 
 **Verify:**
 - The recorded pickup sequence gives the same stacks.
-- Drop the equipped staff: it unequips, and picking it up gives back the same instance.
-- Consumables and durability still work.
+- Drop the equipped staff: it unequips, and picking it up gives an item with the same definition and stats.
+- A scroll used once still has 2 uses after drop and pickup.
+- Consumables still work.
 
 ### F6: Item stats
 **Goal:** items carry stat values, and those values become attribute modifiers only while equipped.
@@ -257,7 +262,7 @@ Sub-steps:
 1. Rename `FlatDamage` to `BonusDamage`, and add `IncreasedDamage` (base 0, AddBase) replacing `DamageMultiplier`. The damage execution computes (Base + Bonus) × (1 + Increased). GE assets reference attributes by property name, so add a property redirect for the rename, or re-pick the attribute in the few GEs that use it, then resave.
 2. `GE_Stat_*` archetypes: Infinite, StackingType None, one SetByCaller modifier each.
 3. A stat definitions data asset (referenced from a developer-settings class, like `UUIManagerSettings`) maps each `Item.Stat.*` tag to its GE and display format.
-4. A stat-range fragment rolls once when the instance is created, through the one roll helper. Rolled stats stay separate from mutable counters.
+4. A stat-range fragment rolls through the one roll helper, but only for stats the incoming data doesn't already have. A brand-new item rolls; an item rebuilt from data (pickup of a dropped item, later a loaded save) keeps its rolls. Rolls and counters share the one stats map; the stat definitions decide which stats become GEs (durability has none).
 5. On equip, one stat GE per rolled stat is applied with the item as source and stored on the receipt.
 6. Tooltips format stats through the stat definitions (real names, roll ranges).
 7. Retire `GE_FlatDamage`/`GE_DamageMultiplier` in favour of test items.
@@ -266,6 +271,7 @@ Sub-steps:
 
 **Verify:**
 - Two staff pickups show different rolls.
+- Drop a staff and pick it up: its rolls are unchanged (no re-roll).
 - Equipping one: `AbilitySystem.DebugAttribute BonusDamage IncreasedDamage` matches the tooltip, and a bolt deals (Base + Bonus) × (1 + Increased) (compute it by hand first).
 - Swapping staffs replaces the values instead of adding them.
 - No "not set by caller" errors in the log.

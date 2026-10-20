@@ -5,6 +5,27 @@
 #include "Rougelike.h"
 #include "Items/Fragments/ItemFragment.h"
 
+UItemInstance *UItemInstance::CreateItem(UObject *Outer, TSubclassOf<UItemDefinition> InItemDefinition, const TMap<FGameplayTag, float> &InItemStats)
+{
+    if (!Outer || !InItemDefinition)
+    {
+        return nullptr;
+    }
+
+    UItemInstance *Item = NewObject<UItemInstance>(Outer);
+    Item->Initialize(InItemDefinition, InItemStats);
+    return Item;
+}
+
+FStackInfo UItemInstance::ToStackInfo(int32 Count) const
+{
+    FStackInfo Data;
+    Data.ItemDefinition = ItemDefinition;
+    Data.Count = Count;
+    Data.ItemStats = ItemStats;
+    return Data;
+}
+
 void UItemInstance::Initialize(
     TSubclassOf<UItemDefinition> InItemDefinition,
     const TMap<FGameplayTag, float> &InItemStats)

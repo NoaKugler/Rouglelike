@@ -24,6 +24,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Item")
 	TArray<TObjectPtr<UItemAction>> OnUseActions;
 
-	UFUNCTION(BlueprintCallable, Category = "Item")
-	bool Use(AActor *ItemOwner, UItemInstance *ItemInstance);
+	/** Runs every action. True if at least one succeeded. Const: a fragment is shared definition data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Item")
+	bool Use(AActor *ItemOwner, UItemInstance *ItemInstance) const;
 };

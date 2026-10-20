@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "ItemTypes.generated.h"
 
 class UItemInstance;
@@ -23,6 +24,10 @@ struct ROUGELIKE_API FItemStack
 	int32 Count = 1;
 };
 
+/**
+ * An item stack as plain data: what pickups hold and what saves will store.
+ * UItemInstance::CreateItem turns it into an instance, UItemInstance::ToStackInfo turns an instance back into it.
+ */
 USTRUCT(BlueprintType)
 struct ROUGELIKE_API FStackInfo
 {

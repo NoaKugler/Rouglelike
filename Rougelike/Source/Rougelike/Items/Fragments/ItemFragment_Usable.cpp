@@ -3,7 +3,7 @@
 #include "Items/Fragments/ItemFragment_Usable.h"
 #include "Items/Actions/ItemAction.h"
 
-bool UItemFragment_Usable::Use(AActor *ItemOwner, UItemInstance *ItemInstance)
+bool UItemFragment_Usable::Use(AActor *ItemOwner, UItemInstance *ItemInstance) const
 {
     bool bAnySucceeded = false;
     for (const TObjectPtr<UItemAction> &Action : OnUseActions)
