@@ -26,6 +26,14 @@ public:
 	/** Fires on the victim once per damaging hit. Native: C++ systems listen here, Blueprint uses UHealthComponent::OnDamaged. */
 	FOnDamageReceived OnDamageReceived;
 
+	/** Input with this tag went down: running abilities hear about it, idle ones try to activate */
+	void AbilityInputTagPressed(const FGameplayTag &InputTag);
+
+	/** Every frame while the input is down: retries idle WhileInputHeld abilities */
+	void AbilityInputTagHeld(const FGameplayTag &InputTag);
+
+	void AbilityInputTagReleased(const FGameplayTag &InputTag);
+
 protected:
 	virtual void OnGiveAbility(FGameplayAbilitySpec &AbilitySpec) override;
 	virtual void OnRemoveAbility(FGameplayAbilitySpec &AbilitySpec) override;
@@ -33,6 +41,9 @@ protected:
 private:
 	void QueueAbilitiesChanged();
 	void BroadcastAbilitiesChanged();
+
+	// Wakes WaitInputPress / WaitInputRelease tasks in the running ability
+	void InvokeInputEvent(EAbilityGenericReplicatedEvent::Type EventType, const FGameplayAbilitySpec &Spec);
 
 	bool bAbilitiesChangedQueued = false;
 };

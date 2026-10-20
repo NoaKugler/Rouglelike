@@ -9,6 +9,17 @@
 
 class UTexture2D;
 
+/** How a granted ability reacts to its input tag */
+UENUM(BlueprintType)
+enum class EAbilityActivationPolicy : uint8
+{
+	/** Activates once per press */
+	OnInputPressed,
+
+	/** Activates on press, then again whenever it can while the input stays down. Its cooldown sets the rate. */
+	WhileInputHeld
+};
+
 /**
  *
  */
@@ -29,6 +40,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	bool bShouldShowInAbilityBar = true;
+
+	/** Only matters for abilities granted with an input tag */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	EAbilityActivationPolicy ActivationPolicy = EAbilityActivationPolicy::OnInputPressed;
 
 	/** Spec of DamageEffect.Effect with its base damage filled in. The attacker's stats scale it when it hits. */
 	UFUNCTION(BlueprintCallable, Category = "Damage")

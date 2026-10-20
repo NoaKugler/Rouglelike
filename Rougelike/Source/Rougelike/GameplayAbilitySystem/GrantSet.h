@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "ActiveGameplayEffectHandle.h"
 #include "GrantSet.generated.h"
@@ -20,6 +21,10 @@ struct FGrantSetAbility
 
 	UPROPERTY(EditDefaultsOnly, Category = "Ability", meta = (ClampMin = "1"))
 	int32 Level = 1;
+
+	/** The input that activates it. Empty for abilities started another way (gameplay events, other abilities). */
+	UPROPERTY(EditDefaultsOnly, Category = "Ability", meta = (Categories = "InputTag"))
+	FGameplayTag InputTag;
 };
 
 /**

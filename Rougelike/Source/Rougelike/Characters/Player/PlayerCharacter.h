@@ -9,6 +9,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
+class URougelikeInputConfig;
 
 struct FInputActionValue;
 
@@ -53,6 +54,14 @@ protected:
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
+
+	/** Ability inputs and the tags they send */
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<URougelikeInputConfig> InputConfig;
+
+	void Input_AbilityPressed(FGameplayTag InputTag);
+	void Input_AbilityHeld(FGameplayTag InputTag);
+	void Input_AbilityReleased(FGameplayTag InputTag);
 
 public:
 	/** Returns CameraBoom subobject **/

@@ -10,6 +10,7 @@
 #include "Rougelike.h"
 #include "MyCollisionChannels.h"
 #include "Characters/Player/MyPlayerController.h"
+#include "Characters/Player/Input/RougelikeInputConfig.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -67,6 +68,22 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCom
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
+
+		// Abilities: each action only sends its tag. Which ability answers is up to the grant sets.
+		if (InputConfig)
+		{
+			for (const FAbilityInputAction &Binding : InputConfig->AbilityInputActions)
+			{
+				if (!Binding.InputAction || !Binding.InputTag.IsValid())
+				{
+					continue;
+				}
+
+				EnhancedInputComponent->BindAction(Binding.InputAction, ETriggerEvent::Started, this, &APlayerCharacter::Input_AbilityPressed, Binding.InputTag);
+				EnhancedInputComponent->BindAction(Binding.InputAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Input_AbilityHeld, Binding.InputTag);
+				EnhancedInputComponent->BindAction(Binding.InputAction, ETriggerEvent::Completed, this, &APlayerCharacter::Input_AbilityReleased, Binding.InputTag);
+			}
+		}
 	}
 	else
 	{
@@ -81,6 +98,21 @@ void APlayerCharacter::Move(const FInputActionValue &Value)
 
 	// route the input
 	DoMove(MovementVector.X, MovementVector.Y);
+}
+
+void APlayerCharacter::Input_AbilityPressed(FGameplayTag InputTag)
+{
+	AbilitySystemComponent->AbilityInputTagPressed(InputTag);
+}
+
+void APlayerCharacter::Input_AbilityHeld(FGameplayTag InputTag)
+{
+	AbilitySystemComponent->AbilityInputTagHeld(InputTag);
+}
+
+void APlayerCharacter::Input_AbilityReleased(FGameplayTag InputTag)
+{
+	AbilitySystemComponent->AbilityInputTagReleased(InputTag);
 }
 
 void APlayerCharacter::DoMove(float Right, float Forward)

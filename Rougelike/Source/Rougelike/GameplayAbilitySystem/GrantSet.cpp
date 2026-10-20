@@ -22,7 +22,14 @@ FGrantedHandles FGrantSet::Give(UAbilitySystemComponent *AbilitySystemComponent,
 		}
 
 		// The spec remembers its source, so the ability can find it later through GetCurrentSourceObject()
-		const FGameplayAbilitySpec Spec(Entry.Ability, Entry.Level, INDEX_NONE, SourceObject);
+		FGameplayAbilitySpec Spec(Entry.Ability, Entry.Level, INDEX_NONE, SourceObject);
+
+		// Dynamic: the input belongs to this grant, not to the ability class, so another source can put the same ability on a different key
+		if (Entry.InputTag.IsValid())
+		{
+			Spec.GetDynamicSpecSourceTags().AddTag(Entry.InputTag);
+		}
+
 		const FGameplayAbilitySpecHandle Handle = AbilitySystemComponent->GiveAbility(Spec);
 		if (Handle.IsValid())
 		{
