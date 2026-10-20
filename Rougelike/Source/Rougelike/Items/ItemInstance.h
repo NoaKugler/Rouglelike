@@ -40,6 +40,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item", meta = (Categories = "Item.Stat"))
 	void SetStatValue(const FGameplayTag &StatTag, float NewValue);
 
+	UFUNCTION(BlueprintPure, Category = "Item", meta = (Categories = "Item.Stat"))
+	bool HasStat(const FGameplayTag &StatTag) const { return ItemStats.Contains(StatTag); }
+
+	/** The stat's name from the stat definitions, or its tag if it has none (so missing data shows) */
+	UFUNCTION(BlueprintPure, Category = "Item|Stats", meta = (Categories = "Item.Stat"))
+	FText GetStatDisplayName(FGameplayTag StatTag) const;
+
+	/** The value, formatted (percent if the definition says so), plus the roll range if the item rolls this stat */
+	UFUNCTION(BlueprintPure, Category = "Item|Stats", meta = (Categories = "Item.Stat"))
+	FText GetStatValueText(FGameplayTag StatTag) const;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (DeterminesOutputType = "FragmentClass"), Category = "Item")
 	const UItemFragment *FindFragmentByClass(const TSubclassOf<UItemFragment> FragmentClass);
 

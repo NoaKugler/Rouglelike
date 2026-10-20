@@ -11,7 +11,11 @@ void UItemFragment_Durability::OnInstanceCreated(UItemInstance *ItemInstance)
     if (!ItemInstance)
         return;
 
-    ItemInstance->SetStatValue(ItemTags::Stat_Durability, MaxUses);
+    // Only a new item starts with full uses; a rebuilt one keeps what it had
+    if (!ItemInstance->HasStat(ItemTags::Stat_Durability))
+    {
+        ItemInstance->SetStatValue(ItemTags::Stat_Durability, MaxUses);
+    }
 }
 
 void UItemFragment_Durability::DecrementDurability(UItemInstance *ItemInstance) const

@@ -4,6 +4,20 @@
 #include "Items/ItemDefinition.h"
 #include "Rougelike.h"
 #include "Items/Fragments/ItemFragment.h"
+#include "Items/Fragments/ItemFragment_StatRolls.h"
+#include "Items/Stats/ItemStatDefinitions.h"
+
+#define LOCTEXT_NAMESPACE "ItemInstance"
+
+namespace
+{
+    FText FormatStatNumber(float Value, bool bPercent)
+    {
+        FNumberFormattingOptions Options;
+        Options.MaximumFractionalDigits = 1;
+        return bPercent ? FText::AsPercent(Value, &Options) : FText::AsNumber(Value, &Options);
+    }
+}
 
 UItemInstance *UItemInstance::CreateItem(UObject *Outer, TSubclassOf<UItemDefinition> InItemDefinition, const TMap<FGameplayTag, float> &InItemStats)
 {
@@ -38,6 +52,9 @@ void UItemInstance::Initialize(
 
     ItemDefinition = InItemDefinition;
 
+    // The data comes first; fragments only fill in what it lacks, so a rebuilt item keeps its state and never re-rolls
+    ItemStats = InItemStats;
+
     UItemDefinition *ItemCDO = ItemDefinition.GetDefaultObject();
     for (const TObjectPtr<UItemFragment> &Fragment : ItemCDO->ItemFragments)
     {
@@ -47,9 +64,6 @@ void UItemInstance::Initialize(
             Fragment->OnInstanceCreated(this);
         }
     }
-
-    // Per key: passed-in values (e.g. the uses left on a dropped item) win, and fragment defaults for other keys stay
-    ItemStats.Append(InItemStats);
 }
 
 const UItemFragment *UItemInstance::FindFragmentByClass(const TSubclassOf<UItemFragment> FragmentClass)
@@ -72,3 +86,28 @@ void UItemInstance::SetStatValue(const FGameplayTag &StatTag, float NewValue)
 {
     ItemStats.Add(StatTag, NewValue);
 }
+
+FText UItemInstance::GetStatDisplayName(FGameplayTag StatTag) const
+{
+    const UItemStatDefinitions *Definitions = UItemStatDefinitions::Get();
+    const FItemStatDefinition *Definition = Definitions ? Definitions->Find(StatTag) : nullptr;
+    return Definition && !Definition->DisplayName.IsEmpty() ? Definition->DisplayName : FText::FromName(StatTag.GetTagName());
+}
+
+FText UItemInstance::GetStatValueText(FGameplayTag StatTag) const
+{
+    const UItemStatDefinitions *Definitions = UItemStatDefinitions::Get();
+    const FItemStatDefinition *Definition = Definitions ? Definitions->Find(StatTag) : nullptr;
+    const bool bPercent = Definition && Definition->bPercent;
+    const FText Value = FormatStatNumber(ItemStats.FindRef(StatTag), bPercent);
+
+    const UItemFragment_StatRolls *Rolls = Cast<UItemFragment_StatRolls>(UItemDefinition::FindFragmentByClass(ItemDefinition, UItemFragment_StatRolls::StaticClass()));
+    const FItemStatRange *Range = Rolls ? Rolls->FindRange(StatTag) : nullptr;
+    if (!Range)
+    {
+        return Value;
+    }
+    return FText::Format(LOCTEXT("StatWithRange", "{0} ({1}-{2})"), Value, FormatStatNumber(Range->Min, bPercent), FormatStatNumber(Range->Max, bPercent));
+}
+
+#undef LOCTEXT_NAMESPACE

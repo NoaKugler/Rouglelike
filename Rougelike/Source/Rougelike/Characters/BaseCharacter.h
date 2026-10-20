@@ -38,7 +38,7 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
     TObjectPtr<UCoreAttributeSet> CoreAttributeSet;
 
-    /** Attacker stats (FlatDamage, DamageMultiplier) that scale every hit this character deals */
+    /** Attacker stats (BonusDamage, IncreasedDamage) that scale every hit this character deals */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
     TObjectPtr<UOffenseAttributeSet> OffenseAttributeSet;
 

@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "AbilitySystemGlobals.h"
+#include "Items/Stats/ItemStatDefinitions.h"
 #include "Rougelike.h"
 
 UEquipmentComponent::UEquipmentComponent()
@@ -60,6 +61,12 @@ UEquipmentInstance *UEquipmentComponent::EquipItem(UItemInstance *Item)
 	if (UAbilitySystemComponent *ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()))
 	{
 		Equipment->GrantedHandles = Definition->Grants.Give(ASC, Item);
+
+		// The item's own values (its rolls) go on the same receipt, so unequip removes them with the grants
+		if (const UItemStatDefinitions *StatDefinitions = UItemStatDefinitions::Get())
+		{
+			StatDefinitions->ApplyEquippedStats(*Item, *ASC, Equipment->GrantedHandles);
+		}
 	}
 
 	Equipped.Add(Equipment);

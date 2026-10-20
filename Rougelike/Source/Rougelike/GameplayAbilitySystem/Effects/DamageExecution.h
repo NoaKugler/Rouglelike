@@ -9,7 +9,7 @@
 /**
  * The damage formula, selected as the execution of every damage GE (GE_Damage, GE_Burn).
  * Runs on the victim for each hit and each periodic tick:
- * (SetByCaller.Damage + attacker's FlatDamage) * attacker's DamageMultiplier, written to the victim's IncomingDamage.
+ * (SetByCaller.Damage + attacker's BonusDamage) * (1 + attacker's IncreasedDamage), written to the victim's IncomingDamage.
  */
 UCLASS()
 class ROUGELIKE_API UDamageExecution : public UGameplayEffectExecutionCalculation

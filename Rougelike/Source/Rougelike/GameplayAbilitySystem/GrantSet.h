@@ -9,6 +9,7 @@
 class UAbilitySystemComponent;
 class UGameplayEffect;
 class URougelikeGameplayAbility;
+struct FGameplayEffectSpec;
 
 /** One ability a grant set gives, and at which level */
 USTRUCT()
@@ -38,6 +39,12 @@ struct ROUGELIKE_API FGrantedHandles
 	void Revoke();
 
 	bool IsEmpty() const { return AbilitySpecHandles.IsEmpty() && EffectHandles.IsEmpty(); }
+
+	/**
+	 * Applies an Infinite effect spec built elsewhere (e.g. an item stat with its value set by caller) and keeps its handle,
+	 * so Revoke removes it with everything else. False if it wasn't applied.
+	 */
+	bool ApplyEffectSpec(UAbilitySystemComponent &ASC, const FGameplayEffectSpec &Spec);
 
 private:
 	friend struct FGrantSet;

@@ -44,13 +44,6 @@ FGrantedHandles FGrantSet::Give(UAbilitySystemComponent *AbilitySystemComponent,
 			continue;
 		}
 
-		// An Instant effect is over before a receipt could hold it, and a timed one ends on its own
-		if (EffectClass.GetDefaultObject()->DurationPolicy != EGameplayEffectDurationType::Infinite)
-		{
-			UE_LOG(LogRougelike, Warning, TEXT("Grant set skipped %s: only Infinite effects can be granted"), *EffectClass->GetName());
-			continue;
-		}
-
 		// One context per effect, so specs never share (and mutate) the same context object
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
 		Context.AddSourceObject(SourceObject);
@@ -61,15 +54,38 @@ FGrantedHandles FGrantSet::Give(UAbilitySystemComponent *AbilitySystemComponent,
 			continue;
 		}
 
-		// Invalid for an effect that failed to apply (e.g. blocked by tag requirements): nothing to revoke then
-		const FActiveGameplayEffectHandle Handle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-		if (Handle.IsValid())
-		{
-			Handles.EffectHandles.Add(Handle);
-		}
+		Handles.ApplyEffectSpec(*AbilitySystemComponent, *Spec.Data.Get());
 	}
 
 	return Handles;
+}
+
+bool FGrantedHandles::ApplyEffectSpec(UAbilitySystemComponent &ASC, const FGameplayEffectSpec &Spec)
+{
+	// One receipt, one ASC: Revoke only knows the one it remembers
+	if (AbilitySystemComponent.IsValid() && AbilitySystemComponent.Get() != &ASC)
+	{
+		ensureMsgf(false, TEXT("A receipt can only hold effects on one ability system component"));
+		return false;
+	}
+
+	// An Instant effect is over before a receipt could hold it, and a timed one ends on its own
+	if (!Spec.Def || Spec.Def->DurationPolicy != EGameplayEffectDurationType::Infinite)
+	{
+		UE_LOG(LogRougelike, Warning, TEXT("Skipped %s: only Infinite effects can be granted"), *GetNameSafe(Spec.Def));
+		return false;
+	}
+
+	AbilitySystemComponent = &ASC;
+
+	// Invalid for an effect that failed to apply (e.g. blocked by tag requirements): nothing to revoke then
+	const FActiveGameplayEffectHandle Handle = ASC.ApplyGameplayEffectSpecToSelf(Spec);
+	if (!Handle.IsValid())
+	{
+		return false;
+	}
+	EffectHandles.Add(Handle);
+	return true;
 }
 
 void FGrantedHandles::Revoke()
