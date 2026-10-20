@@ -4,13 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "GameplayTagContainer.h"
 #include "EquipmentInstance.generated.h"
 
-class ACharacter;
+class AActor;
 class UItemInstance;
 class UEquipmentDefinition;
+
 /**
- *
+ * Runtime record of one equipped item. Created and owned by UEquipmentComponent, which does all the work;
+ * the record only remembers what equipping did, so unequipping can undo exactly that.
  */
 UCLASS(BlueprintType)
 class ROUGELIKE_API UEquipmentInstance : public UObject
@@ -18,21 +21,32 @@ class ROUGELIKE_API UEquipmentInstance : public UObject
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
-	TSubclassOf<UEquipmentDefinition> EquipmentDefinition;
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+	UItemInstance *GetItem() const { return Item; }
 
-	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
-	TObjectPtr<UItemInstance> SourceItemInstance;
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+	TSubclassOf<UEquipmentDefinition> GetDefinition() const { return Definition; }
 
-	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
-	TObjectPtr<AActor> EquipmentActor;
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+	FGameplayTag GetSlot() const { return Slot; }
 
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void Initialize(UItemInstance *InSourceItemInstance, ACharacter *Character);
+	/** Null for equipment without an actor */
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+	AActor *GetSpawnedActor() const { return SpawnedActor; }
 
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void HandleEquipItem(ACharacter *Character);
+private:
+	friend class UEquipmentComponent;
 
-	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	void HandleUnequipItem(ACharacter *Character);
+	// The inventory owns the item; the record only points at it
+	UPROPERTY()
+	TObjectPtr<UItemInstance> Item;
+
+	UPROPERTY()
+	TSubclassOf<UEquipmentDefinition> Definition;
+
+	UPROPERTY()
+	FGameplayTag Slot;
+
+	UPROPERTY()
+	TObjectPtr<AActor> SpawnedActor;
 };

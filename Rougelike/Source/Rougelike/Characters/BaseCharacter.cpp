@@ -137,20 +137,3 @@ void ABaseCharacter::HandleDeath()
     // Every character stops moving when it dies; subclasses add what death means for them
     GetCharacterMovement()->DisableMovement();
 }
-
-void ABaseCharacter::DebugRevokeStartingGrants()
-{
-    StartingGrantHandles.Revoke();
-}
-
-void ABaseCharacter::DebugGiveStartingGrants()
-{
-    // Giving over a live receipt would orphan it: its grants could never be revoked again
-    if (!StartingGrantHandles.IsEmpty())
-    {
-        UE_LOG(LogRougelike, Warning, TEXT("%s: starting grants are already given"), *GetName());
-        return;
-    }
-
-    StartingGrantHandles = StartingGrants.Give(AbilitySystemComponent, this);
-}

@@ -71,13 +71,6 @@ public:
 
     virtual UAbilitySystemComponent *GetAbilitySystemComponent() const override;
 
-    // TEMPORARY (F1 test): proves the receipt removes exactly what it gave. Delete after testing.
-    UFUNCTION(Exec)
-    void DebugRevokeStartingGrants();
-
-    UFUNCTION(Exec)
-    void DebugGiveStartingGrants();
-
     // Old weapon path: only WeaponsManagerComponent uses these two. Deleted in F4, when weapons go through FGrantSet.
     UFUNCTION(BlueprintCallable, Category = "AbilitySystem")
     TArray<FGameplayAbilitySpecHandle> GrantAbilities(TArray<TSubclassOf<UGameplayAbility>> AbilitiesToGrant);
