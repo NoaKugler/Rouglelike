@@ -78,6 +78,9 @@ private:
 	// Shared by both Pre hooks so base and current value always obey the same limits
 	void ClampAttribute(const FGameplayAttribute &Attribute, float &NewValue) const;
 
+	// 0 normally, 1 while the owner has Status.Unkillable
+	float GetHealthFloor() const;
+
 	// Moves Health or Mana after its max went from OldMax to NewMax
 	void FollowMaxChange(const FGameplayAttribute &CurrentAttribute, float OldMax, float NewMax);
 

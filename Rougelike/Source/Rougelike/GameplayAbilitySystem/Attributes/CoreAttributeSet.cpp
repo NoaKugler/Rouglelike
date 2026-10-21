@@ -2,6 +2,7 @@
 
 #include "GameplayAbilitySystem/Attributes/CoreAttributeSet.h"
 #include "GameplayAbilitySystem/RougelikeAbilitySystemComponent.h"
+#include "GameplayAbilitySystem/RougelikeGameplayTags.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 
@@ -67,7 +68,7 @@ void UCoreAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 
         if (DamageDone > 0.f)
         {
-            // Goes through PreAttributeBaseChange, so Health stays clamped at 0
+            // Goes through PreAttributeBaseChange, so Health stays clamped at its floor
             const float HealthBefore = GetHealth();
             SetHealth(HealthBefore - DamageDone);
             SendDamageReport(Data, DamageDone, HealthBefore - GetHealth());
@@ -79,7 +80,7 @@ void UCoreAttributeSet::ClampAttribute(const FGameplayAttribute &Attribute, floa
 {
     if (Attribute == GetHealthAttribute())
     {
-        NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+        NewValue = FMath::Clamp(NewValue, GetHealthFloor(), GetMaxHealth());
     }
     else if (Attribute == GetManaAttribute())
     {
@@ -90,6 +91,13 @@ void UCoreAttributeSet::ClampAttribute(const FGameplayAttribute &Attribute, floa
         // A max of 0 would divide by zero in the health bar
         NewValue = FMath::Max(NewValue, 1.f);
     }
+}
+
+float UCoreAttributeSet::GetHealthFloor() const
+{
+    // In the clamp, not the damage code: every way Health goes down passes through here
+    const UAbilitySystemComponent *ASC = GetOwningAbilitySystemComponent();
+    return ASC && ASC->HasMatchingGameplayTag(RougelikeGameplayTags::Status_Unkillable) ? 1.f : 0.f;
 }
 
 void UCoreAttributeSet::FollowMaxChange(const FGameplayAttribute &CurrentAttribute, float OldMax, float NewMax)
