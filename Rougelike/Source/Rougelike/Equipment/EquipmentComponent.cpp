@@ -3,6 +3,7 @@
 #include "Equipment/EquipmentInstance.h"
 #include "Items/ItemInstance.h"
 #include "Items/Fragments/ItemFragment_Equippable.h"
+#include "Items/Fragments/ItemFragment_WorldRepresentation.h"
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
@@ -174,6 +175,13 @@ void UEquipmentComponent::SpawnEquipmentActor(UEquipmentInstance &Equipment, con
 	}
 
 	Actor->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, Definition.EquipmentSocketName);
+
+	// After the attach: snapping resets the relative scale
+	const UItemFragment_WorldRepresentation *WorldFragment = Equipment.Item ? Cast<UItemFragment_WorldRepresentation>(Equipment.Item->FindFragmentByClass(UItemFragment_WorldRepresentation::StaticClass())) : nullptr;
+	if (WorldFragment)
+	{
+		Actor->SetActorRelativeScale3D(WorldFragment->GetItemScale3D());
+	}
 	Equipment.SpawnedActor = Actor;
 }
 

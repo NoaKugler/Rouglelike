@@ -23,6 +23,7 @@ namespace
 UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	PickupClass = AItemPickup::StaticClass();
 }
 
 void UInventoryComponent::AddItem(TSubclassOf<UItemDefinition> ItemDefinition, int32 Count, const TMap<FGameplayTag, float> &ItemStats)
